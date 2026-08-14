@@ -238,6 +238,9 @@ const LS_LOG = "cleanNews.logs.v1";
 const LS_KEY = "cleanNews.apiKey.v1";
 let category = "경제";
 
+/* 공유 링크(게시된 페이지)로 열렸는지 — 이 환경은 외부 사이트 접속이 막혀 있습니다 */
+const IS_HOSTED = typeof claude!=="undefined" && claude && typeof claude.use==="function";
+
 const $ = id => document.getElementById(id);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 
@@ -720,8 +723,7 @@ function renderStats(){
 
 /* 내려받기 — 공유 링크로 열었을 때와 파일로 열었을 때 모두 동작합니다 */
 async function download(name, content, type){
-  const host = (typeof claude!=="undefined" && claude && typeof claude.use==="function")
-    ? await claude.use("downloads").catch(()=>null) : null;
+  const host = IS_HOSTED ? await claude.use("downloads").catch(()=>null) : null;
 
   if(host){                                   // 공유된 페이지 — 보는 사람이 저장을 확인합니다
     const text = "﻿"+content;
@@ -750,7 +752,9 @@ const firstUrl = t => (t.match(/https?:\/\/[^\s"'<>]+/)||[""])[0];
 /* 뉴스 사이트에서 복사하면 따라붙는 잡동사니 */
 const JUNK = /무단\s*전재|재배포\s*금지|저작권자|ⓒ|©|구독(하기)?$|채널\s*추가|관련\s*기사|많이\s*본|주요\s*뉴스|헤드라인|댓글\s*\d*$|광고|기사제보|제보하기|앱\s*다운|로그인|회원가입|쿠키|배너|공유하기|카카오톡|페이스북|트위터|네이버에서|바로가기|맨\s*위로|사진\s*=|이미지\s*=|영상\s*=|\[사진|\[영상|더보기$|[\w.+-]+@[\w.-]+\.[a-z]{2,}|^[가-힣]{2,4}\s*(기자|특파원|앵커)\b/i;
 const BREADCRUMB = /^\S{1,12}\s*[>›»/|]\s*\S{1,12}(\s*[>›»/|]\s*\S{1,12})*$/;
-const META_LINE = /^(입력|수정|승인|등록|송고)\s*[:\s]?\s*\d{4}[.\-/]|^\d{4}[.\-/]\d{1,2}[.\-/]\d{1,2}[\s.]*\d{0,2}:?\d{0,2}$|^[가-힣]{2,4}\s*(기자|특파원|앵커)$/;
+const META_LINE = /^(입력|수정|승인|등록|송고|게재\s*시간|발행\s*시간|최종\s*수정)\s*[:\s]?\s*\d{0,4}|^\d{4}[.\-/]\d{1,2}[.\-/]\d{1,2}[\s.]*\d{0,2}:?\d{0,2}$|^[가-힣]{2,4}\s*(기자|특파원|앵커)$/;
+/* 사진·영상 캡션 — 기사 문장이 아니라 이미지 설명입니다 */
+const CAPTION = /^(사진|이미지|영상|동영상|그래픽|도표|삽화)\s*(설명|출처|제공)?\s*[,:]|^(사진|이미지|영상)\s*(설명|출처)\s*$/;
 
 /* 기사 뒤에 붙는 '목록' 제목 — 본문 중간에는 나오지 않으므로 만나면 뒤를 통째로 버립니다.
    ⓒ·저작권 문구는 사진 설명으로 본문 중간에도 나오므로 여기 넣지 않고 그 줄만 건너뜁니다. */
@@ -784,12 +788,29 @@ function cleanArticle(raw){
     if(TAIL_CUT.test(l) && l.length<40 && out.join("").length>=200) break;   // 본문이 끝난 지점
     if(out.length && l===out[out.length-1]) continue;           // 중복 줄
     if(META_LINE.test(l)) continue;
+    if(CAPTION.test(l)) continue;
     if(BREADCRUMB.test(l)) continue;
     if(JUNK.test(l) && l.length<120) continue;
     if(l.length<16 && !isSentenceLine(l)) continue;             // 메뉴·버튼 글자
     out.push(l);
   }
   return out.join("\n").trim();
+}
+
+/* 수집한 본문 맨 앞에 제목이 한 번 더 들어 있으면 지웁니다 (요약에 제목이 섞이는 것 방지) */
+function dropRepeatedTitle(body, title){
+  if(!title) return body;
+  const norm = s => s.replace(/[\s"'“”‘’.,…!?·]/g,"");
+  const t = norm(title);
+  if(t.length<8) return body;
+  const lines = body.split("\n");
+  for(let i=0;i<Math.min(3,lines.length);i++){
+    const l = norm(lines[i]);
+    if(l && (l===t || (l.length<t.length*1.5 && (t.includes(l)||l.includes(t))))){
+      lines.splice(i,1); break;
+    }
+  }
+  return lines.join("\n");
 }
 
 /* 남은 줄 중에서 '실제 기사 문단'이 이어지는 구간만 잘라냅니다.
@@ -900,9 +921,9 @@ async function fetchArticle(url, log){
         return {title, body};
       }},
     { name:"원문 프록시", run: async () =>
-        extractFromHtml(await grab("https://api.allorigins.win/raw?url="+encodeURIComponent(url))) },
+        extractFromHtml(await grab("https://proxy.cors.sh/"+url, 25000)) },
     { name:"보조 프록시", run: async () =>
-        extractFromHtml(await grab("https://corsproxy.io/?url="+encodeURIComponent(url))) }
+        extractFromHtml(await grab("https://api.allorigins.win/raw?url="+encodeURIComponent(url))) }
   ];
   const fails=[], spare=[];
   for(const t of tries){
@@ -912,9 +933,9 @@ async function fetchArticle(url, log){
       const raw = (r.body||"").trim();
       if(raw.replace(/\s/g,"").length < 80){ fails.push(`${t.name}: 내용 없음`); continue; }
 
-      const cleaned = cleanArticle(raw);
-      const core = coreBody(cleaned);
       const title = (r.title||"").trim();
+      const cleaned = dropRepeatedTitle(cleanArticle(raw), title);
+      const core = coreBody(cleaned);
 
       // 잘 정리된 결과부터 차례로 채택합니다
       if(core.length>=250) return {title, body:core, via:t.name};
@@ -932,6 +953,15 @@ async function fetchArticle(url, log){
     spare.sort((a,b)=>b.len-a.len);
     return spare[0];
   }
+  // 세 경로가 모두 '요청 자체가 나가지 못함'이면 사이트 문제가 아니라 환경 문제입니다
+  const blocked = fails.every(f=>/Failed to fetch|NetworkError|Load failed|시간 초과|blocked/i.test(f));
+  if(blocked && IS_HOSTED)
+    throw new Error("공유 링크로 열린 페이지는 보안 정책상 외부 뉴스 사이트에 접속할 수 없습니다.\n"
+      +"기사 본문을 복사해 아래 칸에 붙여넣으면 똑같이 분석됩니다. 링크 자동 수집이 꼭 필요하면 내려받은 clean-news.html 파일을 직접 열어 주세요.");
+  if(blocked)
+    throw new Error("브라우저에서 외부 요청이 차단됐습니다. 뉴스 사이트가 아니라 이 페이지의 실행 환경 문제입니다.\n"
+      +"· 인터넷 연결을 확인해 주세요\n· 광고 차단·보안 확장 프로그램을 잠시 꺼 보세요\n· 학교·회사 네트워크라면 막혀 있을 수 있습니다\n"
+      +"해결되지 않으면 기사 본문을 복사해 아래 칸에 붙여넣으면 똑같이 분석됩니다.");
   throw new Error("링크에서 본문을 가져오지 못했습니다.\n· "+fails.join("\n· ")
     +"\n로그인이 필요하거나 자동 수집을 막아둔 사이트일 수 있습니다. 기사 본문을 복사해 아래 칸에 붙여넣으면 똑같이 분석됩니다.");
 }
@@ -1033,6 +1063,15 @@ $("wipe").onclick = () => { if(confirm("저장된 분석 기록을 모두 삭제
 (function init(){
   const k=store.get(LS_KEY);
   if(k){ $("key").value=k; $("saveKey").checked=true; }
+
+  // 공유 링크로 열렸다면 링크 수집이 불가능하므로 미리 안내합니다
+  if(IS_HOSTED){
+    $("useProxy").checked = false;
+    $("useProxy").disabled = true;
+    $("useProxy").parentElement.querySelector("span").innerHTML =
+      "링크 자동 가져오기는 <b>공유 링크로 열었을 때 쓸 수 없습니다</b> — 보안 정책상 외부 사이트에 접속할 수 없습니다. 기사 본문을 복사해 아래 칸에 붙여넣어 주세요.";
+    $("url").placeholder = "공유 페이지에서는 링크 수집이 안 됩니다 — 본문을 붙여넣어 주세요";
+  }
   renderStats();
 })();
 </script>
