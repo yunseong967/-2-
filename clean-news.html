@@ -1,0 +1,1040 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>클린 뉴스 &amp; 맥락 번역기</title>
+<style>
+  :root{
+    --bg:#f6f7fb; --panel:#ffffff; --panel-2:#f0f2f8; --line:#e2e5ee;
+    --text:#1a1d26; --muted:#666e82; --accent:#2f6df6; --accent-soft:#e8efff;
+    --fact:#1f9d63; --fact-bg:#e6f6ee; --opin:#d9822b; --opin-bg:#fdf1e2;
+    --quote:#7a5af8; --quote-bg:#efeaff; --warn:#d94848; --warn-bg:#fdeaea;
+    --radius:14px; --shadow:0 1px 2px rgba(16,24,40,.06),0 8px 24px rgba(16,24,40,.06);
+  }
+  /* 기기 설정이 어두울 때 (밝게를 직접 고른 경우는 제외) */
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#0f1218; --panel:#161a22; --panel-2:#1c212b; --line:#2a3140;
+      --text:#e8ebf2; --muted:#98a1b3; --accent:#5b8cff; --accent-soft:#1b2740;
+      --fact:#46c98b; --fact-bg:#122a20; --opin:#f0a65a; --opin-bg:#2e2216;
+      --quote:#a68bff; --quote-bg:#241f3a; --warn:#ff7b7b; --warn-bg:#2e1a1a;
+      --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.35);
+    }
+  }
+  /* 보는 사람이 어둡게를 직접 고른 경우 */
+  :root[data-theme="dark"]{
+    --bg:#0f1218; --panel:#161a22; --panel-2:#1c212b; --line:#2a3140;
+    --text:#e8ebf2; --muted:#98a1b3; --accent:#5b8cff; --accent-soft:#1b2740;
+    --fact:#46c98b; --fact-bg:#122a20; --opin:#f0a65a; --opin-bg:#2e2216;
+    --quote:#a68bff; --quote-bg:#241f3a; --warn:#ff7b7b; --warn-bg:#2e1a1a;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.35);
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:var(--bg); color:var(--text);
+    font-family:"Pretendard","Apple SD Gothic Neo","Malgun Gothic",system-ui,-apple-system,sans-serif;
+    line-height:1.65; -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:960px;margin:0 auto;padding:28px 18px 80px}
+  header.top{text-align:center;padding:22px 0 26px}
+  header.top h1{font-size:28px;margin:0 0 8px;letter-spacing:-.5px}
+  header.top p{margin:0;color:var(--muted);font-size:14px}
+  .badge{display:inline-block;background:var(--accent-soft);color:var(--accent);
+    font-size:12px;font-weight:700;padding:4px 10px;border-radius:999px;margin-bottom:12px}
+
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
+    padding:18px;margin-bottom:16px;box-shadow:var(--shadow)}
+  .card h2{font-size:16px;margin:0 0 12px;display:flex;align-items:center;gap:8px}
+  .card h2 .n{width:22px;height:22px;border-radius:7px;background:var(--accent);color:#fff;
+    font-size:12px;display:grid;place-items:center;flex:none}
+
+  label.lbl{display:block;font-size:13px;font-weight:600;color:var(--muted);margin:14px 0 6px}
+  input[type=text],input[type=password],textarea,select{
+    width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:10px;
+    background:var(--panel-2);color:var(--text);font-size:14px;font-family:inherit;outline:none}
+  input:focus,textarea:focus,select:focus{border-color:var(--accent)}
+  textarea{min-height:190px;resize:vertical;line-height:1.7}
+
+  .chips{display:flex;flex-wrap:wrap;gap:8px}
+  .chip{border:1px solid var(--line);background:var(--panel-2);color:var(--muted);
+    padding:8px 14px;border-radius:999px;font-size:14px;cursor:pointer;transition:.15s;user-select:none}
+  .chip:hover{border-color:var(--accent)}
+  .chip.on{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}
+
+  .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:16px}
+  button{font-family:inherit;font-size:14px;border-radius:10px;cursor:pointer;border:1px solid transparent;padding:11px 18px;transition:.15s}
+  .btn-main{background:var(--accent);color:#fff;font-weight:700;flex:1;min-width:180px}
+  .btn-main:hover{filter:brightness(1.08)}
+  .btn-main:disabled{opacity:.55;cursor:progress}
+  .btn-sub{background:var(--panel-2);color:var(--text);border-color:var(--line)}
+  .btn-sub:hover{border-color:var(--accent);color:var(--accent)}
+  .btn-danger{background:transparent;color:var(--warn);border-color:var(--line)}
+
+  .switch{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);cursor:pointer}
+  .switch input{width:16px;height:16px;accent-color:var(--accent)}
+
+  details.adv{margin-top:14px;border-top:1px dashed var(--line);padding-top:12px}
+  details.adv summary{cursor:pointer;font-size:13px;color:var(--muted);font-weight:600;list-style:none}
+  details.adv summary::-webkit-details-marker{display:none}
+  details.adv summary::before{content:"⚙ ";}
+  .note{font-size:12px;color:var(--muted);background:var(--panel-2);border-left:3px solid var(--line);
+    padding:9px 12px;border-radius:0 8px 8px 0;margin-top:10px}
+  .note.warn{border-left-color:var(--warn);background:var(--warn-bg);color:var(--warn)}
+
+  #result{display:none}
+  .sum-item{display:flex;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}
+  .sum-item:last-child{border-bottom:none}
+  .sum-item .num{width:26px;height:26px;flex:none;border-radius:8px;background:var(--accent-soft);
+    color:var(--accent);font-weight:800;font-size:13px;display:grid;place-items:center}
+
+  .vocab{border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:10px;background:var(--panel-2)}
+  .vocab .w{font-weight:800;color:var(--accent);font-size:15px}
+  .vocab .tag{font-size:11px;color:var(--muted);border:1px solid var(--line);
+    border-radius:999px;padding:2px 8px;margin-left:8px;background:var(--panel)}
+  .vocab .d{font-size:14px;margin-top:5px}
+  .vocab .ex{font-size:12.5px;color:var(--muted);margin-top:6px;font-style:italic}
+
+  .legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12.5px;color:var(--muted);margin-bottom:12px}
+  .dot{display:inline-block;width:9px;height:9px;border-radius:3px;margin-right:5px;vertical-align:middle}
+  h3.sub{font-size:13.5px;margin:22px 0 10px;padding-bottom:6px;border-bottom:1px solid var(--line)}
+  .sent{padding:12px 14px;border-radius:10px;margin-bottom:9px;font-size:14.5px;border-left:4px solid}
+  .sent .kind{font-size:11px;font-weight:800;letter-spacing:.3px;display:block;margin-bottom:4px;opacity:.9}
+  .sent .why{display:block;margin-top:7px;font-size:12.5px;color:var(--muted);
+    padding-top:7px;border-top:1px dashed var(--line)}
+  .s-fact{background:var(--fact-bg);border-color:var(--fact)} .s-fact .kind{color:var(--fact)}
+  .s-opin{background:var(--opin-bg);border-color:var(--opin)} .s-opin .kind{color:var(--opin)}
+  .s-quote{background:var(--quote-bg);border-color:var(--quote)} .s-quote .kind{color:var(--quote)}
+  mark{background:rgba(255,214,0,.32);color:inherit;padding:0 2px;border-radius:3px;font-weight:700}
+
+  .bars{display:flex;height:12px;border-radius:999px;overflow:hidden;margin:4px 0 14px;background:var(--panel-2)}
+  .bars i{display:block}
+  .metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}
+  .metric{background:var(--panel-2);border:1px solid var(--line);border-radius:12px;padding:12px}
+  .metric b{display:block;font-size:22px;letter-spacing:-.5px}
+  .metric span{font-size:12px;color:var(--muted)}
+
+  .check{display:flex;gap:10px;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--line);font-size:14px}
+  .check:last-child{border-bottom:none}
+  .check .ic{flex:none;width:22px;height:22px;border-radius:7px;display:grid;place-items:center;font-size:12px;font-weight:800}
+  .ok{background:var(--fact-bg);color:var(--fact)} .no{background:var(--warn-bg);color:var(--warn)}
+  .check small{display:block;color:var(--muted);font-size:12.5px}
+
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th,td{text-align:left;padding:8px 6px;border-bottom:1px solid var(--line)}
+  th{color:var(--muted);font-weight:600;font-size:12px}
+  .statbar{height:8px;border-radius:999px;background:var(--accent);min-width:3px}
+  .empty{color:var(--muted);font-size:13.5px;text-align:center;padding:22px 0}
+  .err{background:var(--warn-bg);color:var(--warn);padding:12px;border-radius:10px;font-size:13.5px;margin-top:12px}
+  .spin{display:inline-block;width:13px;height:13px;border:2px solid rgba(255,255,255,.4);
+    border-top-color:#fff;border-radius:50%;animation:sp .7s linear infinite;margin-right:7px;vertical-align:-2px}
+  @keyframes sp{to{transform:rotate(360deg)}}
+  footer{text-align:center;color:var(--muted);font-size:12px;padding:24px 0}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="top">
+  <div class="badge">문해력 · 확증편향 방지 도구</div>
+  <h1>클린 뉴스 &amp; 맥락 번역기</h1>
+  <p>뉴스를 <b>3줄요약</b> · <b>어휘풀이</b> · <b>사실/의견 분리</b>로 다시 읽어 드립니다.</p>
+</header>
+
+<!-- ── 입력 ── -->
+<section class="card">
+  <h2><span class="n">1</span> 분야를 고르세요</h2>
+  <div class="chips" id="cats"></div>
+
+  <label class="lbl" for="url">뉴스 링크 — 주소를 붙여넣고 Enter</label>
+  <input type="text" id="url" placeholder="https://news.example.com/article/123">
+
+  <label class="switch" style="margin-top:10px">
+    <input type="checkbox" id="useProxy" checked>
+    <span>링크에서 본문 자동 가져오기 — 외부 수집 서비스로 <b>주소가 전송</b>됩니다. 끄면 아래에 직접 붙여넣기.</span>
+  </label>
+
+  <label class="lbl" for="text">또는 뉴스 본문 붙여넣기 <span style="color:var(--accent)">← 로그인이 필요한 기사는 이 방법이 확실합니다</span></label>
+  <textarea id="text" placeholder="기사 제목과 본문을 그대로 붙여넣어 주세요. 기자 이름·저작권 문구 같은 군더더기는 자동으로 걸러냅니다."></textarea>
+
+  <div class="row">
+    <button class="btn-main" id="run">분석하기</button>
+    <button class="btn-sub" id="sample">예시 기사 넣기</button>
+    <button class="btn-sub" id="clear">지우기</button>
+  </div>
+
+  <details class="adv">
+    <summary>고급 설정 — AI 정밀 분석 (Claude API)</summary>
+    <label class="lbl" for="key">API 키 (선택)</label>
+    <input type="password" id="key" placeholder="sk-ant-... 비워두면 내장 규칙 엔진으로 분석합니다">
+    <label class="lbl" for="model">모델</label>
+    <select id="model">
+      <option value="claude-sonnet-5">Claude Sonnet 5 (권장)</option>
+      <option value="claude-opus-5">Claude Opus 5 (최고 품질)</option>
+      <option value="claude-haiku-4-5-20251001">Claude Haiku 4.5 (빠름)</option>
+    </select>
+    <label class="switch" style="margin-top:10px">
+      <input type="checkbox" id="saveKey"><span>이 브라우저에 키 저장</span>
+    </label>
+    <div class="note warn">키는 브라우저에 그대로 노출됩니다. 개인 실습용으로만 쓰고, 실제 서비스로 배포할 때는 반드시 서버(백엔드)로 옮기세요.</div>
+  </details>
+  <div id="err"></div>
+</section>
+
+<!-- ── 결과 ── -->
+<div id="result">
+  <section class="card">
+    <h2><span class="n">2</span> 3줄 요약</h2>
+    <div id="summary"></div>
+  </section>
+
+  <section class="card">
+    <h2><span class="n">3</span> 어휘 풀이</h2>
+    <div id="vocab"></div>
+  </section>
+
+  <section class="card">
+    <h2><span class="n">4</span> 사실 / 의견 분리</h2>
+    <div class="legend">
+      <span><i class="dot" style="background:var(--fact)"></i>사실 — 확인 가능한 정보</span>
+      <span><i class="dot" style="background:var(--opin)"></i>의견·해석 — 누군가의 판단</span>
+    </div>
+    <div class="bars" id="bars"></div>
+    <div class="metrics" id="metrics"></div>
+
+    <h3 class="sub" style="color:var(--fact)">확인해 볼 핵심 사실</h3>
+    <div id="keyfacts"></div>
+    <h3 class="sub" style="color:var(--opin)">기사에 담긴 판단·전망</h3>
+    <div id="keyopins"></div>
+  </section>
+
+  <section class="card">
+    <h2><span class="n">5</span> 신뢰도 체크리스트</h2>
+    <div id="checks"></div>
+    <div class="note">체크리스트는 글의 <b>형식</b>만 봅니다. 내용의 진위를 판정하지 않으니, 항상 원문과 다른 매체를 함께 확인하세요.</div>
+  </section>
+</div>
+
+<!-- ── 기록/통계 ── -->
+<section class="card">
+  <h2><span class="n">6</span> 분석 기록 &amp; 통계 <span style="font-size:12px;color:var(--muted);font-weight:400">(향후 DB 연동용)</span></h2>
+  <div id="stats"></div>
+  <div class="row">
+    <button class="btn-sub" id="expJson">JSON 내보내기</button>
+    <button class="btn-sub" id="expCsv">CSV 내보내기</button>
+    <button class="btn-danger" id="wipe">기록 전체 삭제</button>
+  </div>
+</section>
+
+<footer>클린 뉴스 &amp; 맥락 번역기 · 모든 분석은 브라우저 안에서 이뤄집니다</footer>
+</div>
+
+<script>
+"use strict";
+
+/* ════════ 0. 기본 설정 ════════ */
+const CATS = ["스포츠","경제","정치","연예","과학"];
+const LS_LOG = "cleanNews.logs.v1";
+const LS_KEY = "cleanNews.apiKey.v1";
+let category = "경제";
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+
+/* ════════ 1. 어휘 사전 ════════ */
+const COMMON = {
+  "관계자":"그 일과 관련된 사람. 이름을 밝히지 않을 때 쓰는 표현이라, 누구인지 확인이 어렵습니다.",
+  "소식통":"소식을 전해준 익명의 사람. 검증이 어려우니 주의해서 읽어야 합니다.",
+  "잠정":"임시로 정한 것. 나중에 바뀔 수 있습니다.",
+  "유예":"정해진 때를 뒤로 미루는 것.",
+  "촉구":"어떤 일을 빨리 하라고 강하게 요구하는 것.",
+  "시사":"직접 말하지 않고 넌지시 알리는 것.",
+  "일축":"상대의 주장을 한마디로 잘라 거절하는 것.",
+  "쟁점":"의견이 서로 갈려 다투게 되는 핵심 지점.",
+  "추이":"시간이 지나며 변해가는 흐름.",
+  "귀추":"일이 앞으로 어떻게 될지의 결과.",
+  "이례적":"흔히 있는 일이 아닌, 아주 드문 일.",
+  "전례":"이전에 있었던 비슷한 사례.",
+  "박차":"일에 속도를 더 내는 것.",
+  "고조":"분위기나 긴장이 점점 높아지는 것.",
+  "완화":"엄격하던 것을 느슨하게 풀어주는 것.",
+  "가시화":"눈에 보일 만큼 뚜렷해지는 것.",
+  "여파":"어떤 일이 끝난 뒤에도 남아 미치는 영향.",
+  "답보":"제자리에 머물러 나아가지 못하는 상태.",
+  "심의":"내용을 자세히 따져보고 결정하는 절차.",
+  "제고":"수준이나 정도를 더 높이는 것.",
+  "간극":"둘 사이의 벌어진 차이.",
+  "논란":"의견이 갈려 시끄럽게 다투는 상황.",
+  "우려":"잘못될까 봐 걱정하는 마음. 사실이 아니라 판단입니다."
+};
+const VOCAB = {
+  "경제":{
+    "기준금리":"한국은행이 정하는 나라의 대표 이자율. 오르면 대출 이자도 함께 오릅니다.",
+    "인플레이션":"물건 값이 전반적으로 계속 오르는 현상. 같은 돈으로 살 수 있는 게 줄어듭니다.",
+    "디플레이션":"물건 값이 계속 떨어지는 현상. 소비가 얼어붙어 경기가 나빠집니다.",
+    "물가상승률":"작년 같은 달과 비교해 물건 값이 몇 % 올랐는지를 나타낸 수치.",
+    "경상수지":"우리나라가 외국과 물건·서비스를 사고팔아 남긴 돈의 총합.",
+    "무역수지":"수출액에서 수입액을 뺀 값. 플러스면 흑자, 마이너스면 적자입니다.",
+    "가계부채":"국민들이 은행 등에서 빌린 돈의 총액.",
+    "공매도":"주식을 빌려서 먼저 팔고, 값이 내리면 싸게 사서 갚아 차익을 남기는 거래.",
+    "코스피":"우리나라 대표 기업들의 주가를 하나로 묶어 보여주는 지수.",
+    "채권":"돈을 빌려주고 받는 증서. 만기에 원금과 이자를 돌려받습니다.",
+    "환율":"우리 돈과 외국 돈을 바꾸는 비율. 오르면 수입품이 비싸집니다.",
+    "양적완화":"중앙은행이 시장에 돈을 대량으로 풀어 경기를 살리는 정책.",
+    "리쇼어링":"해외로 나갔던 공장을 자기 나라로 다시 데려오는 것.",
+    "실적":"기업이 일정 기간 벌어들인 매출과 이익.",
+    "영업이익":"기업이 본업으로 벌어 비용을 뺀 뒤 남은 돈.",
+    "출자":"사업에 돈을 대는 것.",
+    "구조조정":"기업이 살아남기 위해 사업·인력을 정리하고 다시 짜는 일.",
+    "지주회사":"다른 회사의 주식을 갖고 지배하는 것이 주된 목적인 회사.",
+    "긴축":"돈을 푸는 것을 줄이거나 씀씀이를 조이는 것."
+  },
+  "정치":{
+    "국정감사":"국회가 정부가 일을 제대로 했는지 해마다 따져 묻는 절차.",
+    "탄핵소추":"대통령 등 고위 공직자를 헌법 위반으로 파면해 달라고 국회가 청구하는 것.",
+    "필리버스터":"법안 처리를 막기 위해 합법적으로 길게 발언해 시간을 끄는 것.",
+    "개헌":"헌법의 내용을 고치는 것.",
+    "본회의":"국회의원 전체가 모여 법안을 최종 결정하는 회의.",
+    "상임위원회":"분야별로 나눠 법안을 먼저 검토하는 국회의 작은 회의체.",
+    "여당":"대통령(정부)과 같은 편인 정당.",
+    "야당":"정부와 반대편에 서서 견제하는 정당.",
+    "공청회":"정책을 정하기 전에 전문가와 국민의 의견을 듣는 자리.",
+    "거부권":"국회가 통과시킨 법안을 대통령이 다시 논의하라며 돌려보내는 권한.",
+    "당론":"정당이 공식으로 정한 입장.",
+    "표결":"찬성과 반대를 세어 결정하는 것.",
+    "발의":"법안이나 안건을 처음 내놓는 것.",
+    "임명동의":"대통령이 지명한 사람을 국회가 승인해 주는 절차.",
+    "특검":"큰 사건을 정부와 독립된 검사가 따로 수사하는 제도.",
+    "재의결":"돌려보내진 법안을 국회가 다시 표결하는 것.",
+    "정족수":"회의를 열거나 결정을 내리기 위해 필요한 최소 인원."
+  },
+  "과학":{
+    "임상시험":"새 약이나 치료법이 사람에게 안전하고 효과 있는지 확인하는 연구 단계.",
+    "유전자가위":"유전자의 특정 부분을 잘라내거나 고치는 기술.",
+    "반감기":"방사성 물질의 양이 절반으로 줄어드는 데 걸리는 시간.",
+    "양자컴퓨터":"0과 1을 동시에 다루는 원리로 특정 계산을 아주 빠르게 하는 컴퓨터.",
+    "표본":"전체를 다 조사할 수 없어 대신 뽑아 조사한 일부.",
+    "유의미":"우연이라고 보기 어려울 만큼 통계적으로 뚜렷한 차이가 있다는 뜻.",
+    "상관관계":"두 가지가 함께 움직이는 관계. 원인과 결과라는 뜻은 아닙니다.",
+    "인과관계":"하나가 원인이 되어 다른 하나가 생긴 관계.",
+    "가설":"아직 검증되지 않은, 연구로 확인해야 할 예상.",
+    "동료평가":"같은 분야 연구자들이 논문을 검토해 문제가 없는지 확인하는 절차.",
+    "재현성":"같은 방법으로 다시 해도 같은 결과가 나오는 성질.",
+    "탄소중립":"내뿜는 온실가스와 흡수하는 양을 같게 만들어 실질 배출을 0으로 하는 것.",
+    "생성형":"학습한 내용을 바탕으로 새로운 글·그림을 만들어내는 방식.",
+    "알고리즘":"문제를 푸는 정해진 절차나 규칙.",
+    "위성궤도":"인공위성이 지구 주위를 도는 정해진 길.",
+    "변이":"바이러스나 유전자의 성질이 조금 달라진 것."
+  },
+  "스포츠":{
+    "트레이드":"두 구단이 선수를 서로 맞바꾸는 것.",
+    "웨이버":"구단이 선수와의 계약을 포기해 다른 팀이 데려갈 수 있게 공개하는 절차.",
+    "FA":"자유계약선수. 일정 기간을 뛴 뒤 원하는 구단과 계약할 자격을 얻은 선수.",
+    "방어율":"투수가 9이닝당 평균 몇 점을 내줬는지 나타내는 수치. 낮을수록 좋습니다.",
+    "타율":"타자가 친 횟수 대비 안타 비율.",
+    "포스트시즌":"정규 시즌이 끝난 뒤 상위 팀들이 겨루는 최종 경기.",
+    "리그":"같은 종목 팀들이 일정 기간 서로 겨루는 대회 체계.",
+    "승부조작":"돈 등을 목적으로 경기 결과를 미리 짜맞추는 범죄.",
+    "도핑":"기록을 높이려 금지 약물을 쓰는 것.",
+    "부상자명단":"다친 선수를 일정 기간 경기에서 빼두는 공식 목록.",
+    "감독대행":"감독이 자리를 비운 동안 임시로 팀을 이끄는 사람.",
+    "연장전":"정해진 시간에 승부가 안 나 더 치르는 경기.",
+    "이적료":"선수를 데려오며 원 소속 팀에 지불하는 돈."
+  },
+  "연예":{
+    "컴백":"가수나 배우가 새 작품을 들고 활동을 다시 시작하는 것.",
+    "OST":"영화·드라마에 쓰인 음악.",
+    "리메이크":"예전 작품을 새로 다시 만드는 것.",
+    "차트인":"음원 순위표 안에 이름을 올리는 것.",
+    "음원성적":"노래가 스트리밍·다운로드에서 얻은 순위와 이용량.",
+    "매니지먼트":"연예인의 활동과 계약을 관리해 주는 회사나 업무.",
+    "전속계약":"연예인이 한 회사와만 활동하기로 맺은 계약.",
+    "티저":"본편 공개 전에 궁금증을 끌기 위해 짧게 내놓는 예고 영상.",
+    "시청률":"그 프로그램을 본 가구·시청자의 비율.",
+    "논란몰이":"사실 확인 없이 문제를 크게 부풀려 몰아가는 것.",
+    "손절":"팬이나 대중이 특정 인물에 대한 지지를 끊는 것.",
+    "월드투어":"여러 나라를 돌며 여는 공연."
+  }
+};
+
+/* ════════ 2. 텍스트 처리 ════════ */
+const STOP = new Set("그리고 그러나 하지만 또한 이번 지난 오늘 내일 어제 우리 이런 저런 그런 대한 위해 통해 대해 따르면 관련 경우 지난해 올해 가장 매우 더욱 다시 이후 이전 당시 현재 최근 모두 다른 같은 것으로 것이다 라고 했다 한다 있다 없다 되다 이라고".split(" "));
+const JOSA = /(으로서|으로써|에서는|에게서|이라고|라고는|에서도|까지도|부터는|으로는|와의|과의|에게|께서|에서|부터|까지|보다|처럼|만큼|이나|라도|으로|로써|로서|이며|이고|하고|이란|라는|이라|은|는|이|가|을|를|의|에|와|과|도|로|만|랑|께)$/;
+
+function stem(w){ let p = w.replace(JOSA,""); return p.length>=2 ? p : w; }
+
+function tokens(s){
+  const out=[];
+  (s.match(/[가-힣]{2,}|[A-Za-z]{3,}/g)||[]).forEach(w=>{
+    const t = /[가-힣]/.test(w) ? stem(w) : w.toUpperCase();
+    if(t.length>=2 && !STOP.has(t)) out.push(t);
+  });
+  return out;
+}
+
+function splitSentences(body){
+  const raw = body.split(/\n+/).flatMap(line =>
+    line.split(/(?<=[.!?…])\s+|(?<=다\.)(?=\s*[가-힣"'“])/)
+  );
+  return raw.map(s=>s.trim()).filter(s=>s.length>=12);
+}
+
+function parseInput(t){
+  const lines = t.trim().split(/\n+/).map(s=>s.trim()).filter(Boolean);
+  let title="", body=t.trim();
+  if(lines.length>1 && lines[0].length<=80 && !/[.!?]$/.test(lines[0])){
+    title = lines[0]; body = lines.slice(1).join("\n");
+  }
+  return {title, body};
+}
+
+/* ════════ 3. 3줄 요약 (빈도 + 위치 + 제목 가중치) ════════ */
+function summarize(sents, title){
+  if(sents.length<=3) return sents.slice();
+  const freq = {};
+  sents.forEach(s => tokens(s).forEach(t => freq[t]=(freq[t]||0)+1));
+  const tset = new Set(tokens(title));
+  const scored = sents.map((s,i)=>{
+    const tk = tokens(s);
+    if(!tk.length) return {i,s,score:0,tk:new Set()};
+    let sc = tk.reduce((a,t)=>a+(freq[t]||0),0)/Math.sqrt(tk.length);
+    sc *= (i===0?1.25 : i===1?1.12 : i>=sents.length-2?0.92:1);      // 위치 가중
+    sc *= 1 + 0.25*(tk.filter(t=>tset.has(t)).length/tk.length);      // 제목 겹침
+    if(/\d/.test(s)) sc *= 1.06;                                      // 수치 포함
+    if(s.length>190) sc *= 0.9;
+    return {i,s,score:sc,tk:new Set(tk)};
+  }).sort((a,b)=>b.score-a.score);
+
+  const picked=[];
+  for(const c of scored){
+    if(picked.length>=3) break;
+    const dup = picked.some(p=>{
+      const inter=[...c.tk].filter(t=>p.tk.has(t)).length;
+      return inter/Math.max(1,Math.min(c.tk.size,p.tk.size)) > 0.6;   // 중복 제거
+    });
+    if(!dup) picked.push(c);
+  }
+  while(picked.length<3 && picked.length<scored.length) picked.push(scored[picked.length]);
+  return picked.sort((a,b)=>a.i-b.i).map(p=>p.s);
+}
+
+/* ════════ 4. 어휘 추출 ════════ */
+function findVocab(text, cat){
+  const found=[], seen=new Set();
+  const push=(w,d,tag)=>{ if(seen.has(w)||!text.includes(w)) return; seen.add(w); found.push({w,d,tag}); };
+  Object.entries(VOCAB[cat]||{}).forEach(([w,d])=>push(w,d,cat));
+  Object.entries(COMMON).forEach(([w,d])=>push(w,d,"공통"));
+  Object.entries(VOCAB).forEach(([c,dict])=>{ if(c!==cat) Object.entries(dict).forEach(([w,d])=>push(w,d,c)); });
+
+  const acro = [...new Set(text.match(/\b[A-Z]{2,5}\b/g)||[])].filter(a=>!seen.has(a)).slice(0,4);
+  acro.forEach(a=>found.push({w:a,d:"영문 약어입니다. 기사 안에서 무엇의 줄임말인지 설명하고 있는지 확인해 보세요.",tag:"약어"}));
+
+  found.forEach(v=>{
+    const hit = text.split(/(?<=[.!?…])\s+/).find(s=>s.includes(v.w));
+    if(hit) v.ex = hit.trim().slice(0,90) + (hit.length>90?"…":"");
+  });
+  return found.slice(0,12);
+}
+
+/* ════════ 5. 사실 / 의견 / 인용 분류 ════════ */
+const RE_QUOTE  = /["“”'‘’]|라고\s*(말|밝|전|덧붙|강조|설명)|라며|이라며|고\s*(말했|전했|강조했|설명했|덧붙였)/;
+const RE_OPIN   = /(것으로\s*)?보인다|전망(이다|된다|이|했|하)|예상(된다|했)|내다봤|예측했|기대(된다|를 모으|했)|우려|지적(했|됐|이)|비판|주장|해석(된다|했)|평가(된다|받|했|하고)|분석(된다|했)|풀이된다|셈이다|듯하다|것 같다|해야\s*한다|필요하다|아쉽|충격|경악|논란(이 되|을 빚)|의문|불가피|사실상|호평|혹평|기록적|역대급|초유의|분수령|우세하다/;
+const RE_FACT   = /\d|밝혔다|발표(했다|됐다)|집계(됐|된)|조사(됐|결과)|확인(됐|된)|나타났다|기록(했다|됐다)|공시|의결|가결|부결|체결|선정(됐|된)|열렸다|출시(했|됐)|통과(했|됐)|제출(했|됐)|승인(했|됐)|착수/;
+const RE_SRC    = /에\s*따르면|발표|자료|보고서|조사(에서|결과)|공시|통계|논문|판결|성명/;
+const RE_ANON   = /관계자|소식통|알려졌다|전해졌다|이라는 말이|~로 보인다/;
+const RE_SENSA  = /충격|경악|발칵|소름|경고|초유|역대급|참담|폭탄|공포|난리|카더라|미쳤|헉|충격적|눈물|분노 폭발/;
+
+function classify(s){
+  const cues=[];
+  const grab = re => { const m=s.match(re); if(m) cues.push(m[0]); };
+  if(RE_QUOTE.test(s)){ grab(RE_QUOTE); return {kind:"quote", label:"인용 — 누군가의 말", cues, conf:"높음"}; }
+  if(RE_OPIN.test(s)){ grab(RE_OPIN);  return {kind:"opin",  label:"의견·해석", cues, conf: RE_FACT.test(s)?"보통":"높음"}; }
+  if(RE_FACT.test(s)){ grab(RE_FACT);  return {kind:"fact",  label:"사실 — 확인 가능", cues, conf:"높음"}; }
+  return {kind:"fact", label:"사실 — 단순 서술", cues, conf:"보통"};
+}
+
+function highlight(s, cues){
+  let h = esc(s);
+  [...new Set(cues)].forEach(c=>{
+    if(!c || c.length<2) return;
+    h = h.replace(esc(c), m=>`<mark>${m}</mark>`);
+  });
+  return h;
+}
+
+/* ════════ 6. 핵심 항목 추리기 — 문장 전수 나열 대신 중요한 것만 ════════ */
+function importance(s, freq, tset, idx){
+  const tk = tokens(s);
+  if(!tk.length) return 0;
+  let sc = tk.reduce((a,t)=>a+(freq[t]||0),0)/Math.sqrt(tk.length);
+  sc *= 1 + 0.35*(tk.filter(t=>tset.has(t)).length/tk.length);   // 제목 핵심어를 담은 문장
+  sc *= idx===0 ? 1.2 : idx<3 ? 1.08 : 1;                        // 기사 앞부분에 결론이 옵니다
+  return sc;
+}
+
+/* 이 사실을 어떻게 확인할지 알려주는 힌트 */
+function checkHint(s){
+  const h=[];
+  if(/\d+(\.\d+)?\s*(%|퍼센트|포인트)/.test(s)) h.push("무엇과 비교한 수치인지, 어느 기관 통계인지");
+  else if(/\d/.test(s)) h.push("숫자의 기준 시점과 단위");
+  if(RE_SRC.test(s)) h.push("원 자료(발표문·통계표·판결문)를 직접 열어 보기");
+  if(RE_ANON.test(s)) h.push("익명 출처라 검증이 어려움 — 실명 근거가 있는지");
+  if(!h.length) h.push("다른 매체도 같은 사실을 전하는지 교차 확인");
+  return h.join(" · ");
+}
+
+/* 이 판단이 누구의 것인지 밝히기 */
+function whoSays(s, kind){
+  const q = s.match(/^([^,"“”']{2,22}?)(은|는|이|가|께서|측은)\s/);
+  if(kind==="quote") return q ? q[1].trim()+"의 말" : "인용된 인물의 말";
+  const g = s.match(/(시장에서는|전문가들|업계에서는|일각에서는|정치권|여권|야권|팬들|누리꾼|증권가)/);
+  if(g) return g[1].replace(/에서는$/,"")+"의 판단";
+  if(RE_ANON.test(s)) return "익명 관계자의 말";
+  return "기사 작성자의 판단";
+}
+
+function pickKey(items, title, kind, limit){
+  const freq = {}; items.forEach(i => tokens(i.text).forEach(t => freq[t]=(freq[t]||0)+1));
+  const tset = new Set(tokens(title));
+  const pool = items
+    .map((it,i)=>{
+      let imp = importance(it.text, freq, tset, i);
+      if(kind==="fact" && (/\d/.test(it.text) || RE_SRC.test(it.text))) imp *= 1.45;  // 검증 가능한 것 우선
+      return {...it, imp, tk:new Set(tokens(it.text))};
+    })
+    .filter(it => kind==="fact"
+      ? it.kind==="fact"
+      : (it.kind==="opin" || (it.kind==="quote" && RE_OPIN.test(it.text))))
+    .sort((a,b)=>b.imp-a.imp);
+
+  const out=[];
+  for(const c of pool){
+    if(out.length>=limit) break;
+    const dup = out.some(p=>{
+      const inter=[...c.tk].filter(t=>p.tk.has(t)).length;
+      return inter/Math.max(1,Math.min(c.tk.size,p.tk.size)) > 0.6;
+    });
+    if(!dup) out.push(c);
+  }
+  return out.map(c => kind==="fact"
+    ? {text:c.text, note:checkHint(c.text), cues:c.cues, kind:"fact"}
+    : {text:c.text, note:whoSays(c.text, c.kind), cues:c.cues, kind:c.kind==="quote"?"quote":"opin"});
+}
+
+/* ════════ 7. 규칙 기반 분석 ════════ */
+function analyzeLocal(title, body){
+  const sents = splitSentences(body);
+  if(!sents.length) throw new Error("문장을 찾지 못했습니다. 기사 본문을 조금 더 길게 붙여넣어 주세요.");
+  const text = title + "\n" + body;
+  const items = sents.map(s=>({ text:s, ...classify(s) }));
+  const cnt = {fact:0, opin:0, quote:0};
+  items.forEach(i=>cnt[i.kind]++);
+  return {
+    title: title || "(제목 없음)",
+    summary: summarize(sents, title),
+    vocab: findVocab(text, category),
+    keyFacts: pickKey(items, title, "fact", 4),
+    keyOpins: pickKey(items, title, "opin", 4),
+    total: items.length, cnt,
+    checks: buildChecks(sents, cnt, text),
+    engine: "규칙 기반 엔진"
+  };
+}
+
+function buildChecks(sents, cnt, text){
+  const n = sents.length;
+  const src   = sents.filter(s=>RE_SRC.test(s)).length;
+  const anon  = sents.filter(s=>RE_ANON.test(s)).length;
+  const num   = sents.filter(s=>/\d/.test(s)).length;
+  const sensa = (text.match(new RegExp(RE_SENSA.source,"g"))||[]).length;
+  const opRate = Math.round(cnt.opin/n*100);
+  return [
+    { ok: src>=Math.max(1,Math.round(n*0.15)),
+      t:`출처를 밝힌 문장 ${src}개 (전체 ${n}문장)`,
+      s: src ? "‘~에 따르면’, ‘발표’ 같은 근거 표시가 있습니다." : "근거를 밝힌 문장이 거의 없습니다. 어디서 온 정보인지 확인하세요." },
+    { ok: anon<=1,
+      t:`익명 출처 표현 ${anon}개`,
+      s: anon>1 ? "‘관계자·소식통·알려졌다’가 많으면 검증이 어렵습니다." : "익명에 크게 기대지 않는 글입니다." },
+    { ok: num>=Math.max(1,Math.round(n*0.2)),
+      t:`구체적 수치가 있는 문장 ${num}개`,
+      s: num ? "숫자는 사실 확인의 실마리입니다. 기준 시점과 비교 대상을 살펴보세요." : "숫자가 없어 주장 검증이 어렵습니다." },
+    { ok: sensa<=1,
+      t:`자극적 표현 ${sensa}회`,
+      s: sensa>1 ? "‘충격·경악·역대급’ 같은 말은 감정을 흔들어 판단을 흐립니다." : "과장된 표현이 적은 편입니다." },
+    { ok: opRate<=45,
+      t:`의견·해석 비중 ${opRate}%`,
+      s: opRate>45 ? "사실보다 판단이 많은 글입니다. 반대 시각의 기사도 함께 읽어 보세요." : "사실 서술의 비중이 충분합니다." }
+  ];
+}
+
+/* ════════ 8. AI 분석 (선택) ════════ */
+async function analyzeAI(title, body, key, model){
+  const prompt =
+`너는 청소년 대상 뉴스 해설가다. 아래 ${category} 분야 기사를 분석해 JSON만 출력해라. 설명이나 마크다운 없이 JSON 객체 하나만.
+
+{"summary":["3줄요약 문장1","문장2","문장3"],
+ "vocab":[{"w":"어려운 낱말","d":"중학생도 이해할 쉬운 풀이 1~2문장"}],
+ "keyFacts":[{"text":"기사에서 가장 중요한 사실 주장","note":"이걸 어떻게 확인하면 되는지 30자 내외"}],
+ "keyOpins":[{"text":"기사에 담긴 중요한 판단·전망·평가","note":"누구의 판단인지 (예: 기사 작성자의 판단, 이창용 총재의 말)"}],
+ "ratio":{"fact":0,"opin":0,"quote":0}}
+
+규칙
+- summary: 각 40~70자, 기사에 없는 내용 금지.
+- vocab: 어려운 한자어·전문용어·약어 5~10개.
+- keyFacts: 문장을 전부 나열하지 말고, 기사 전체 맥락에서 <b>중요하고 사실 확인이 필요한 것 3~4개</b>만. 숫자·날짜·발표 내용처럼 검증 가능한 것을 우선한다. 원문 표현을 살리되 한 문장으로 정리해도 된다.
+- keyOpins: 사실처럼 쓰였지만 실은 판단인 것 3~4개. 전망·평가·우려·비판이 핵심 대상.
+- ratio: 본문 전체에서 사실/의견/인용 문장이 각각 몇 개인지 어림수.
+
+제목: ${title}
+본문: ${body}`;
+
+  const res = await fetch("https://api.anthropic.com/v1/messages",{
+    method:"POST",
+    headers:{"content-type":"application/json","x-api-key":key,
+      "anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},
+    body: JSON.stringify({model, max_tokens:4000, messages:[{role:"user",content:prompt}]})
+  });
+  if(!res.ok) throw new Error("AI 호출 실패 ("+res.status+"). 키와 잔액을 확인하세요.");
+  const data = await res.json();
+  const raw = (data.content||[]).map(c=>c.text||"").join("");
+  const m = raw.match(/\{[\s\S]*\}/);
+  if(!m) throw new Error("AI 응답을 해석하지 못했습니다.");
+  const j = JSON.parse(m[0]);
+
+  const sents = splitSentences(body);
+  const r = j.ratio || {};
+  let cnt = {fact:+r.fact||0, opin:+r.opin||0, quote:+r.quote||0};
+  if(!(cnt.fact+cnt.opin+cnt.quote)){                       // ratio가 비면 직접 셉니다
+    cnt = {fact:0,opin:0,quote:0};
+    sents.forEach(s=>cnt[classify(s).kind]++);
+  }
+  return {
+    title: title||"(제목 없음)",
+    summary:(j.summary||[]).slice(0,3),
+    vocab:(j.vocab||[]).map(v=>({w:v.w,d:v.d,tag:"AI"})),
+    keyFacts:(j.keyFacts||[]).slice(0,5).map(f=>({text:f.text,note:f.note||"",kind:"fact",cues:[]})),
+    keyOpins:(j.keyOpins||[]).slice(0,5).map(o=>({text:o.text,note:o.note||"",kind:"opin",cues:[]})),
+    total: cnt.fact+cnt.opin+cnt.quote,
+    cnt,
+    checks: buildChecks(sents, cnt, title+"\n"+body),
+    engine:"AI 정밀 분석 ("+model+")"
+  };
+}
+
+/* ════════ 9. 렌더링 ════════ */
+function render(r){
+  $("summary").innerHTML = r.summary.map((s,i)=>
+    `<div class="sum-item"><span class="num">${i+1}</span><span>${esc(s)}</span></div>`).join("")
+    || `<div class="empty">요약할 문장이 부족합니다.</div>`;
+
+  $("vocab").innerHTML = r.vocab.length ? r.vocab.map(v=>
+    `<div class="vocab"><span class="w">${esc(v.w)}</span><span class="tag">${esc(v.tag||"용어")}</span>
+     <div class="d">${esc(v.d)}</div>${v.ex?`<div class="ex">본문: “${esc(v.ex)}”</div>`:""}</div>`).join("")
+    : `<div class="empty">특별히 어려운 용어가 발견되지 않았습니다. 쉽게 쓰인 기사입니다.</div>`;
+
+  const tot = r.total || 1;
+  const pct = k => Math.round(r.cnt[k]/tot*100);
+  $("bars").innerHTML =
+    `<i style="width:${pct('fact')}%;background:var(--fact)"></i>
+     <i style="width:${pct('opin')}%;background:var(--opin)"></i>
+     <i style="width:${pct('quote')}%;background:var(--quote)"></i>`;
+  $("metrics").innerHTML =
+    `<div class="metric"><b style="color:var(--fact)">${pct('fact')}%</b><span>사실 서술</span></div>
+     <div class="metric"><b style="color:var(--opin)">${pct('opin')}%</b><span>의견·해석</span></div>
+     <div class="metric"><b style="color:var(--quote)">${pct('quote')}%</b><span>인용</span></div>
+     <div class="metric"><b>${tot}</b><span>전체 문장 · ${esc(r.engine)}</span></div>`;
+
+  const list = (arr, cls, lead) => arr.length ? arr.map(it=>
+    `<div class="sent s-${cls==='fact'?'fact':it.kind==='quote'?'quote':'opin'}">
+       ${highlight(it.text, it.cues||[])}
+       ${it.note?`<span class="why">${lead} ${esc(it.note)}</span>`:""}
+     </div>`).join("") : null;
+
+  $("keyfacts").innerHTML = list(r.keyFacts,"fact","🔍 확인 포인트 —")
+    || `<div class="empty">검증할 만한 구체적 사실이 잘 보이지 않습니다. 수치나 출처가 없는 기사일 수 있습니다.</div>`;
+  $("keyopins").innerHTML = list(r.keyOpins,"opin","💬")
+    || `<div class="empty">두드러진 판단·전망 없이 사실 위주로 쓰인 기사입니다.</div>`;
+
+  $("checks").innerHTML = r.checks.map(c=>
+    `<div class="check"><span class="ic ${c.ok?'ok':'no'}">${c.ok?'✓':'!'}</span>
+      <span><b>${esc(c.t)}</b><small>${esc(c.s)}</small></span></div>`).join("");
+
+  $("result").style.display="block";
+  $("result").scrollIntoView({behavior:"smooth",block:"start"});
+}
+
+/* ════════ 9. 기록 저장 · 통계 (향후 DB 이관용 스키마) ════════ */
+/* 저장소 접근이 막힌 환경(파일 미리보기·시크릿 모드)에서도 분석은 계속되도록 감쌉니다 */
+const store = {
+  get(k){ try{ return localStorage.getItem(k); }catch{ return null; } },
+  set(k,v){ try{ localStorage.setItem(k,v); return true; }catch{ return false; } },
+  del(k){ try{ localStorage.removeItem(k); }catch{} }
+};
+const loadLogs = () => { try{ return JSON.parse(store.get(LS_LOG)||"[]"); }catch{ return []; } };
+
+function saveLog(r, url, chars){
+  const tot = r.total || 1;
+  const logs = loadLogs();
+  logs.unshift({
+    id: Date.now(), analyzed_at: new Date().toISOString(),
+    category, title: r.title.slice(0,120), url: url||"",
+    char_count: chars||0,
+    sentence_count: tot,
+    fact_count: r.cnt.fact, opinion_count: r.cnt.opin, quote_count: r.cnt.quote,
+    opinion_ratio: +(r.cnt.opin/tot).toFixed(3),
+    vocab_count: r.vocab.length,
+    engine: r.engine,
+    summary: r.summary
+  });
+  store.set(LS_LOG, JSON.stringify(logs.slice(0,300)));
+  renderStats();
+}
+
+function renderStats(){
+  const logs = loadLogs(), box=$("stats");
+  if(!logs.length){ box.innerHTML=`<div class="empty">아직 분석 기록이 없습니다. 기사를 분석하면 여기에 쌓입니다.</div>`; return; }
+  const per = {}; CATS.forEach(c=>per[c]={n:0,op:0});
+  logs.forEach(l=>{ if(!per[l.category]) per[l.category]={n:0,op:0}; per[l.category].n++; per[l.category].op+=l.opinion_ratio; });
+  const max = Math.max(...Object.values(per).map(v=>v.n),1);
+  const avg = (logs.reduce((a,l)=>a+l.opinion_ratio,0)/logs.length*100).toFixed(0);
+
+  box.innerHTML =
+    `<div class="metrics" style="margin-bottom:14px">
+       <div class="metric"><b>${logs.length}</b><span>총 분석 건수</span></div>
+       <div class="metric"><b>${avg}%</b><span>평균 의견 비중</span></div>
+       <div class="metric"><b>${logs[0].category}</b><span>최근 분야</span></div>
+     </div>
+     <table><thead><tr><th>분야</th><th style="width:45%">건수</th><th>평균 의견 비중</th></tr></thead><tbody>
+     ${CATS.map(c=>`<tr><td>${c}</td>
+        <td><div style="display:flex;align-items:center;gap:8px">
+          <div class="statbar" style="width:${per[c].n/max*100}%"></div><span>${per[c].n}</span></div></td>
+        <td>${per[c].n?Math.round(per[c].op/per[c].n*100)+"%":"-"}</td></tr>`).join("")}
+     </tbody></table>
+     <table style="margin-top:16px"><thead><tr><th>일시</th><th>분야</th><th>제목</th><th>의견</th></tr></thead><tbody>
+     ${logs.slice(0,8).map(l=>`<tr>
+        <td style="white-space:nowrap">${new Date(l.analyzed_at).toLocaleDateString("ko-KR",{month:"2-digit",day:"2-digit"})}</td>
+        <td>${esc(l.category)}</td><td>${esc(l.title.slice(0,34))}</td>
+        <td>${Math.round(l.opinion_ratio*100)}%</td></tr>`).join("")}
+     </tbody></table>`;
+}
+
+/* 내려받기 — 공유 링크로 열었을 때와 파일로 열었을 때 모두 동작합니다 */
+async function download(name, content, type){
+  const host = (typeof claude!=="undefined" && claude && typeof claude.use==="function")
+    ? await claude.use("downloads").catch(()=>null) : null;
+
+  if(host){                                   // 공유된 페이지 — 보는 사람이 저장을 확인합니다
+    const text = "﻿"+content;
+    try{ await host.save({filename:name, data:text}); }
+    catch(e){
+      const code = e && e.code;
+      if(code==="declined") return;
+      if(code==="extension_not_enabled" && /\.csv$/i.test(name)){
+        try{ await host.save({filename:name.replace(/\.csv$/i,".txt"), data:text});
+             alert("이 환경에서는 csv를 바로 저장할 수 없어 txt로 받았습니다. 확장자를 .csv로 바꾸면 엑셀에서 열립니다."); return; }
+        catch(e2){ if(e2 && e2.code==="declined") return; }
+      }
+      alert("파일 저장이 막혀 있습니다"+(code?" ("+code+")":"")+". 아래 기록 표를 직접 복사해 주세요.");
+    }
+    return;
+  }
+  const a=document.createElement("a");        // 내 컴퓨터의 파일로 열었을 때
+  a.href=URL.createObjectURL(new Blob(["﻿"+content],{type}));
+  a.download=name; a.click(); URL.revokeObjectURL(a.href);
+}
+
+/* ════════ 11. 링크에서 본문 가져오기 · 붙여넣기 정리 ════════ */
+const URL_ONLY = /^\s*https?:\/\/\S+\s*$/i;
+const firstUrl = t => (t.match(/https?:\/\/[^\s"'<>]+/)||[""])[0];
+
+/* 뉴스 사이트에서 복사하면 따라붙는 잡동사니 */
+const JUNK = /무단\s*전재|재배포\s*금지|저작권자|ⓒ|©|구독(하기)?$|채널\s*추가|관련\s*기사|많이\s*본|주요\s*뉴스|헤드라인|댓글\s*\d*$|광고|기사제보|제보하기|앱\s*다운|로그인|회원가입|쿠키|배너|공유하기|카카오톡|페이스북|트위터|네이버에서|바로가기|맨\s*위로|사진\s*=|이미지\s*=|영상\s*=|\[사진|\[영상|더보기$|[\w.+-]+@[\w.-]+\.[a-z]{2,}|^[가-힣]{2,4}\s*(기자|특파원|앵커)\b/i;
+const BREADCRUMB = /^\S{1,12}\s*[>›»/|]\s*\S{1,12}(\s*[>›»/|]\s*\S{1,12})*$/;
+const META_LINE = /^(입력|수정|승인|등록|송고)\s*[:\s]?\s*\d{4}[.\-/]|^\d{4}[.\-/]\d{1,2}[.\-/]\d{1,2}[\s.]*\d{0,2}:?\d{0,2}$|^[가-힣]{2,4}\s*(기자|특파원|앵커)$/;
+
+/* 기사 뒤에 붙는 '목록' 제목 — 본문 중간에는 나오지 않으므로 만나면 뒤를 통째로 버립니다.
+   ⓒ·저작권 문구는 사진 설명으로 본문 중간에도 나오므로 여기 넣지 않고 그 줄만 건너뜁니다. */
+const TAIL_CUT = /^(관련\s*(기사|뉴스)|많이\s*본|가장\s*많이|추천\s*(기사|뉴스)|인기\s*기사|주요\s*뉴스|헤드라인|이\s*시각\s*주요|함께\s*볼|이런\s*기사|다음\s*기사|이전\s*기사|댓글\s*\d*$|많이\s*읽은)/;
+
+/* 링크 덩어리(메뉴·다른 기사 제목 목록) 판별 — 마크다운 링크를 벗기기 전에 재야 합니다 */
+function linkDensity(line){
+  const links=[...line.matchAll(/\[([^\]]*)\]\([^)]*\)/g)];
+  if(!links.length) return 0;
+  const linkChars = links.reduce((a,m)=>a+m[1].trim().length,0);
+  const rest = line.replace(/\[[^\]]*\]\([^)]*\)/g,"").replace(/\s/g,"").length;
+  return linkChars/Math.max(1, linkChars+rest);
+}
+
+const isSentenceLine = l =>
+  /(다|요|죠|까|임|함)[.!?)"”’\]]*$/.test(l) || /[.!?][”"’)]*$/.test(l);
+
+function cleanArticle(raw){
+  const rawLines = String(raw).replace(/\r/g,"").split("\n");
+  const out=[];
+  for(let l of rawLines){
+    l = l.trim();
+    if(!l) continue;
+    if(linkDensity(l) > 0.55 && !isSentenceLine(l)) continue;   // 다른 기사 제목 목록
+    l = l.replace(/!\[[^\]]*\]\([^)]*\)/g,"")                   // 이미지
+         .replace(/\[([^\]]*)\]\([^)]*\)/g,"$1")                // 링크 → 글자만
+         .replace(/^#{1,6}\s*/,"").replace(/^\s*[-*>|+]\s+/,"")
+         .replace(/\*\*|__|`{1,3}/g,"")
+         .replace(/\s+/g," ").trim();
+    if(!l || /^[=\-_*·•|]+$/.test(l)) continue;
+    if(TAIL_CUT.test(l) && l.length<40 && out.join("").length>=200) break;   // 본문이 끝난 지점
+    if(out.length && l===out[out.length-1]) continue;           // 중복 줄
+    if(META_LINE.test(l)) continue;
+    if(BREADCRUMB.test(l)) continue;
+    if(JUNK.test(l) && l.length<120) continue;
+    if(l.length<16 && !isSentenceLine(l)) continue;             // 메뉴·버튼 글자
+    out.push(l);
+  }
+  return out.join("\n").trim();
+}
+
+/* 남은 줄 중에서 '실제 기사 문단'이 이어지는 구간만 잘라냅니다.
+   다른 기사 제목은 문장으로 끝나지 않아(체언 종결) 여기서 걸러집니다. */
+function coreBody(body){
+  const lines = body.split("\n").filter(Boolean);
+  if(lines.length<3) return body;
+  const w = lines.map(l => isSentenceLine(l) && l.length>=25 ? l.length : -70);
+
+  let best={s:0,e:-1,v:0}, cur=0, st=0;                          // 최대 구간 합
+  for(let i=0;i<w.length;i++){
+    if(cur<=0){ cur=w[i]; st=i; } else cur+=w[i];
+    if(cur>best.v) best={s:st,e:i,v:cur};
+  }
+  if(best.e<best.s) return body;
+  while(best.e>best.s && w[best.e]<0) best.e--;                  // 꼬리 정리
+  const core = lines.slice(best.s, best.e+1).join("\n");
+  return core.length>=200 || core.length>=body.length*0.5 ? core : body;
+}
+
+/* HTML에서 기사 본문만 골라내기 */
+const BODY_SEL = ["#dic_area","#newsct_article","#articleBodyContents","#article-view-content-div",
+  "#articeBody","#news_body_area","#articleBody","#textBody","#CmAdContent",
+  ".article_body",".news_body",".article-body",".art_txt",".view_con",".news-article",
+  "[itemprop=articleBody]","article"];
+
+function htmlToText(el){
+  const html = el.innerHTML
+    .replace(/<(script|style)[\s\S]*?<\/\1>/gi,"")
+    .replace(/<br\s*\/?>/gi,"\n")
+    .replace(/<\/(p|div|li|h[1-6]|section|tr|blockquote)>/gi,"\n")
+    .replace(/<[^>]+>/g," ");
+  const d = document.createElement("div"); d.innerHTML = html;      // 엔티티 복원
+  return d.textContent;
+}
+
+/* 본문이 아닌 영역. 클래스·id를 단어로 쪼개서 판정합니다 —
+   부분 문자열로 재면 article_head·news_read_body 같은 진짜 본문까지 지워집니다("head"·"read" 속의 ad). */
+const DROP_SEL = "script,style,noscript,nav,header,footer,aside,form,iframe,figcaption,button,select";
+const DROP_WORD = /^(ads?|advert(ising|isement)?|banner|promo(tion)?|comment|comments|reply|replies|related|recommend|recommended|popular|rank|ranking|most|sidebar|aside|snb|gnb|lnb|share|sns|subscribe|newsletter|breadcrumb|nav|navigation|menu|gnav|copyright|byline|reporter|tag|tags|issue|series|thumb|thumbnail|widget|paging|pagination)$/i;
+
+function isSideNode(el){
+  const name = ((typeof el.className==="string"?el.className:"")+" "+(el.id||"")).trim();
+  if(!name) return false;
+  return name.split(/[\s\-_.]+/).some(t => t && DROP_WORD.test(t));
+}
+
+/* 본문의 절반 이상을 차지하는 요소는 무슨 이름이든 지우지 않습니다 */
+function pruneSides(root){
+  const total = (root.textContent||"").replace(/\s/g,"").length || 1;
+  root.querySelectorAll(DROP_SEL).forEach(n=>n.remove());
+  [...root.querySelectorAll("*")].forEach(el=>{
+    if(!el.isConnected || !isSideNode(el)) return;
+    if((el.textContent||"").replace(/\s/g,"").length > total*0.5) return;
+    el.remove();
+  });
+}
+
+function extractFromHtml(html){
+  const doc = new DOMParser().parseFromString(html,"text/html");
+  const title = (doc.querySelector('meta[property="og:title"]')?.content
+              || doc.querySelector("h1")?.textContent
+              || doc.title || "").replace(/\s*[|<>-][^|<>-]{0,30}$/,"").trim();
+
+  // 본문 영역을 먼저 확보한 뒤, 그 안에서만 군더더기를 지웁니다
+  let root = null;
+  for(const sel of BODY_SEL){
+    const el = doc.querySelector(sel);
+    if(el && (el.textContent||"").replace(/\s/g,"").length >= 120){ root = el; break; }
+  }
+  if(root){
+    pruneSides(root);
+    return { title, body: htmlToText(root) };
+  }
+
+  // 표준 구조가 아니면 점수로 고릅니다 — 링크가 빽빽한 목록은 배제
+  if(doc.body) pruneSides(doc.body);
+  let best=null, bestScore=0;
+  doc.querySelectorAll("div,section,article").forEach(el=>{
+    const text = (el.textContent||"");
+    const len = text.replace(/\s/g,"").length;
+    if(len<120 || len>60000) return;
+    if(el.querySelector("div,section,article") && len < (el.textContent||"").length*0.3) return;
+    const linkLen = [...el.querySelectorAll("a")].reduce((a,x)=>a+x.textContent.trim().length,0);
+    if(linkLen/len > 0.4) return;                                       // 메뉴·기사 목록
+    const score = len - linkLen*3
+      + el.querySelectorAll("p,br").length*40
+      + ((text.match(/다\.\s/g)||[]).length)*80;                        // 서술형 문장이 많을수록 본문
+    if(score>bestScore){ bestScore=score; best=el; }
+  });
+  return { title, body: best ? htmlToText(best) : (doc.body?doc.body.textContent:"") };
+}
+
+async function grab(url, ms){
+  const c = new AbortController(); const t = setTimeout(()=>c.abort(), ms||15000);
+  try{ const r = await fetch(url,{signal:c.signal}); if(!r.ok) throw new Error(r.status); return await r.text(); }
+  finally{ clearTimeout(t); }
+}
+
+/* 프록시를 순서대로 시도합니다 — 하나가 막혀도 다음으로 넘어갑니다 */
+async function fetchArticle(url, log){
+  const tries = [
+    { name:"리더 서비스", run: async () => {
+        const t = await grab("https://r.jina.ai/"+url);
+        const title = (t.match(/^Title:\s*(.+)$/m)||[])[1] || "";
+        const body = t.replace(/^Title:.*$/m,"").replace(/^URL Source:.*$/m,"")
+                      .replace(/^Published Time:.*$/m,"").replace(/^Markdown Content:\s*/m,"");
+        return {title, body};
+      }},
+    { name:"원문 프록시", run: async () =>
+        extractFromHtml(await grab("https://api.allorigins.win/raw?url="+encodeURIComponent(url))) },
+    { name:"보조 프록시", run: async () =>
+        extractFromHtml(await grab("https://corsproxy.io/?url="+encodeURIComponent(url))) }
+  ];
+  const fails=[], spare=[];
+  for(const t of tries){
+    try{
+      log(`${t.name}로 본문을 가져오는 중…`);
+      const r = await t.run();
+      const raw = (r.body||"").trim();
+      if(raw.replace(/\s/g,"").length < 80){ fails.push(`${t.name}: 내용 없음`); continue; }
+
+      const cleaned = cleanArticle(raw);
+      const core = coreBody(cleaned);
+      const title = (r.title||"").trim();
+
+      // 잘 정리된 결과부터 차례로 채택합니다
+      if(core.length>=250) return {title, body:core, via:t.name};
+      if(cleaned.length>=250) return {title, body:cleaned, via:t.name+" (본문 구간 판별 생략)"};
+      if(core.length>=80) return {title, body:core, via:t.name};
+      if(cleaned.length>=80) return {title, body:cleaned, via:t.name};
+      // 정리 결과가 빈약해도 원문은 확보했으니 보관해 둡니다
+      spare.push({title, body:raw.replace(/\n{2,}/g,"\n"), via:t.name+" (정리 없이 원문)", len:raw.length});
+      fails.push(`${t.name}: 기사 형태를 찾지 못함`);
+    }catch(e){
+      fails.push(`${t.name}: ${/abort/i.test(e.message)?"시간 초과":e.message}`);
+    }
+  }
+  if(spare.length){                                    // 최후 수단 — 덜 정리됐어도 내용은 보여 줍니다
+    spare.sort((a,b)=>b.len-a.len);
+    return spare[0];
+  }
+  throw new Error("링크에서 본문을 가져오지 못했습니다.\n· "+fails.join("\n· ")
+    +"\n로그인이 필요하거나 자동 수집을 막아둔 사이트일 수 있습니다. 기사 본문을 복사해 아래 칸에 붙여넣으면 똑같이 분석됩니다.");
+}
+
+/* ════════ 12. 이벤트 ════════ */
+$("cats").innerHTML = CATS.map(c=>`<span class="chip${c===category?" on":""}" data-c="${c}">${c}</span>`).join("");
+$("cats").onclick = e => {
+  const chip = e.target.closest(".chip"); if(!chip) return;
+  category = chip.dataset.c;
+  [...$("cats").children].forEach(x=>x.classList.toggle("on", x===chip));
+};
+
+$("run").onclick = async () => {
+  const btn=$("run"), errBox=$("err");
+  const say = m => { btn.innerHTML='<span class="spin"></span>'+esc(m); };
+  errBox.innerHTML=""; btn.disabled=true; say("분석 중…");
+  try{
+    let text = $("text").value.trim();
+    let url  = $("url").value.trim();
+
+    // 링크를 본문 칸에 붙여넣었어도 알아서 링크로 처리합니다
+    if(URL_ONLY.test(text)){ url = url || text.trim(); $("url").value = url; text = ""; $("text").value = ""; }
+    if(!url && !text) throw new Error("뉴스 링크를 넣거나 기사 본문을 붙여넣어 주세요.");
+
+    let title="", body="", via="";
+    if(!text){
+      if(!$("useProxy").checked)
+        throw new Error("‘링크에서 본문 자동 가져오기’가 꺼져 있습니다. 켜거나, 기사 본문을 직접 붙여넣어 주세요.");
+      const a = await fetchArticle(url, say);
+      title=a.title; body=a.body; via=a.via;
+      $("text").value = (title? title+"\n":"") + body;      // 가져온 본문을 보여줍니다
+    }else{
+      const p = parseInput(cleanArticle(text));
+      title=p.title; body=coreBody(p.body);
+    }
+    if(body.length<80) throw new Error("본문이 너무 짧습니다. 기사 내용을 조금 더 붙여넣어 주세요.");
+
+    say("문장 분석 중…");
+    const key=$("key").value.trim();
+    let r;
+    if(key){
+      try{ r = await analyzeAI(title, body, key, $("model").value); }
+      catch(e){ errBox.innerHTML=`<div class="err">${esc(e.message)} → 규칙 기반 엔진으로 대신 분석했습니다.</div>`;
+                r = analyzeLocal(title, body); }
+      if($("saveKey").checked) store.set(LS_KEY, key);
+    } else {
+      r = analyzeLocal(title, body);
+    }
+    if(via) errBox.innerHTML += `<div class="note">${esc(via)}로 본문 ${body.length.toLocaleString()}자를 가져왔습니다. 아래 본문 칸에서 잘못 수집된 부분을 고친 뒤 다시 분석할 수 있습니다.</div>`;
+    render(r); saveLog(r, url, body.length);
+  }catch(e){
+    $("err").innerHTML = `<div class="err">${esc(e.message).replace(/\n/g,"<br>")}</div>`;
+  }finally{
+    btn.disabled=false; btn.textContent="분석하기";
+  }
+};
+
+/* 링크만 붙여넣으면 링크 칸으로 옮기고 바로 분석합니다 */
+$("text").addEventListener("paste", e => {
+  const p = (e.clipboardData||window.clipboardData).getData("text");
+  if(URL_ONLY.test(p||"")){
+    e.preventDefault();
+    $("url").value = p.trim(); $("text").value = "";
+    if($("useProxy").checked) $("run").click();
+    else $("err").innerHTML = `<div class="note">링크를 위 칸으로 옮겼습니다. ‘본문 자동 가져오기’를 켜고 분석하거나, 기사 본문을 복사해 붙여넣어 주세요.</div>`;
+  }
+});
+$("url").addEventListener("keydown", e => { if(e.key==="Enter") $("run").click(); });
+
+$("clear").onclick = () => { $("text").value=""; $("url").value=""; $("err").innerHTML=""; $("result").style.display="none"; };
+
+$("sample").onclick = () => {
+  category="경제";
+  [...$("cats").children].forEach(x=>x.classList.toggle("on", x.dataset.c==="경제"));
+  $("text").value =
+`한국은행, 기준금리 3.25%로 동결… "물가 추이 지켜볼 것"
+한국은행 금융통화위원회는 14일 회의를 열고 기준금리를 연 3.25%로 동결했다고 밝혔다. 지난 5월 이후 세 차례 연속 동결이다.
+통계청에 따르면 지난달 소비자물가상승률은 2.4%로, 한은의 목표치인 2%를 여전히 웃돌았다.
+이창용 총재는 회의 뒤 기자간담회에서 "물가가 목표 수준으로 수렴한다는 확신이 들기 전까지는 긴축 기조를 유지하겠다"라고 말했다.
+시장에서는 연내 인하가 어려울 것이라는 전망이 우세하다.
+가계부채가 다시 늘어나는 점도 부담으로 지적됐다. 금융권 관계자는 "부동산 시장이 들썩이면 금리 인하는 더 어려워진다"라고 전했다.
+다만 수출 회복세가 이어지고 있어 경기 하강 우려는 다소 완화된 것으로 보인다.
+전문가들은 내년 상반기가 인하의 분수령이 될 것으로 평가했다.`;
+  $("err").innerHTML="";
+};
+
+$("expJson").onclick = () => {
+  const logs=loadLogs(); if(!logs.length) return alert("내보낼 기록이 없습니다.");
+  download("clean-news-logs.json", JSON.stringify(logs,null,2), "application/json");
+};
+$("expCsv").onclick = () => {
+  const logs=loadLogs(); if(!logs.length) return alert("내보낼 기록이 없습니다.");
+  const cols=["id","analyzed_at","category","title","url","char_count","sentence_count","fact_count","opinion_count","quote_count","opinion_ratio","vocab_count","engine"];
+  const csv=[cols.join(",")].concat(logs.map(l=>cols.map(c=>`"${String(l[c]??"").replace(/"/g,'""')}"`).join(","))).join("\n");
+  download("clean-news-logs.csv", csv, "text/csv;charset=utf-8");
+};
+$("wipe").onclick = () => { if(confirm("저장된 분석 기록을 모두 삭제할까요? 되돌릴 수 없습니다.")){ store.del(LS_LOG); renderStats(); } };
+
+(function init(){
+  const k=store.get(LS_KEY);
+  if(k){ $("key").value=k; $("saveKey").checked=true; }
+  renderStats();
+})();
+</script>
+</body>
+</html>
