@@ -5,144 +5,243 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>클린 뉴스 &amp; 맥락 번역기</title>
 <style>
+  /* ── 팔레트: DESIGN.md_apple ───────────────────────────────
+     상호작용 색은 Action Blue 하나뿐. 명암이 교차하는 전면 타일이 구획을 나눕니다.
+     그림자는 제품 사진 전용이라, 사진이 없는 이 도구에는 그림자가 없습니다. */
   :root{
-    --bg:#f6f7fb; --panel:#ffffff; --panel-2:#f0f2f8; --line:#e2e5ee;
-    --text:#1a1d26; --muted:#666e82; --accent:#2f6df6; --accent-soft:#e8efff;
-    --fact:#1f9d63; --fact-bg:#e6f6ee; --opin:#d9822b; --opin-bg:#fdf1e2;
-    --quote:#7a5af8; --quote-bg:#efeaff; --warn:#d94848; --warn-bg:#fdeaea;
-    --radius:14px; --shadow:0 1px 2px rgba(16,24,40,.06),0 8px 24px rgba(16,24,40,.06);
+    --canvas:#ffffff;          /* Pure White */
+    --parchment:#f5f5f7;       /* Parchment — 애플의 상징적 오프화이트 */
+    --pearl:#fafafc;           /* Pearl — 고스트 버튼 바탕 */
+    --ink:#1d1d1f;             /* Near-Black Ink — 모든 글자 */
+    --ink-80:#333333;
+    --ink-48:#7a7a7a;
+    --hairline:#e0e0e0;
+    --divider:#f0f0f0;
+    --link:#0066cc;            /* Action Blue */
+    --focus:#0071e3;
+    --on-primary:#ffffff;
+    --tile:#272729;            /* Near-Black Tile 1 */
+    --tile-2:#2a2a2c;
+    --mark:#f0f0f0;
+    --r-sm:8px; --r-md:11px; --r-lg:18px; --r-pill:9999px;
+    --inner:980px;
   }
-  /* 기기 설정이 어두울 때 (밝게를 직접 고른 경우는 제외) */
+  /* 어두운 타일 위 — 표면이 바뀌면 잉크와 링크도 함께 바뀝니다 */
+  .t-dark{
+    --canvas:var(--tile-2); --parchment:var(--tile-2); --pearl:var(--tile-2);
+    --ink:#ffffff; --ink-80:#cccccc; --ink-48:#8e8e93;
+    --hairline:#3a3a3c; --divider:#3a3a3c;
+    --link:#2997ff;            /* Sky Link Blue — 어두운 면에서만 */
+    --mark:rgba(255,255,255,.14);
+    background:var(--tile); color:#fff;
+  }
+  /* 기기 설정이 어두울 때 (밝게를 직접 고른 경우는 제외).
+     분석된 문서에 다크 모드 대응이 없어, 애플의 어두운 표면 값으로 구성했습니다. */
   @media (prefers-color-scheme: dark){
     :root:not([data-theme="light"]){
-      --bg:#0f1218; --panel:#161a22; --panel-2:#1c212b; --line:#2a3140;
-      --text:#e8ebf2; --muted:#98a1b3; --accent:#5b8cff; --accent-soft:#1b2740;
-      --fact:#46c98b; --fact-bg:#122a20; --opin:#f0a65a; --opin-bg:#2e2216;
-      --quote:#a68bff; --quote-bg:#241f3a; --warn:#ff7b7b; --warn-bg:#2e1a1a;
-      --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.35);
+      --canvas:#000000; --parchment:#1d1d1f; --pearl:#1d1d1f;
+      --ink:#f5f5f7; --ink-80:#cccccc; --ink-48:#8e8e93;
+      --hairline:#3a3a3c; --divider:#2a2a2c;
+      --link:#2997ff; --focus:#2997ff;
+      --tile:#000000; --tile-2:#1d1d1f; --mark:rgba(255,255,255,.14);
     }
   }
   /* 보는 사람이 어둡게를 직접 고른 경우 */
   :root[data-theme="dark"]{
-    --bg:#0f1218; --panel:#161a22; --panel-2:#1c212b; --line:#2a3140;
-    --text:#e8ebf2; --muted:#98a1b3; --accent:#5b8cff; --accent-soft:#1b2740;
-    --fact:#46c98b; --fact-bg:#122a20; --opin:#f0a65a; --opin-bg:#2e2216;
-    --quote:#a68bff; --quote-bg:#241f3a; --warn:#ff7b7b; --warn-bg:#2e1a1a;
-    --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.35);
+    --canvas:#000000; --parchment:#1d1d1f; --pearl:#1d1d1f;
+    --ink:#f5f5f7; --ink-80:#cccccc; --ink-48:#8e8e93;
+    --hairline:#3a3a3c; --divider:#2a2a2c;
+    --link:#2997ff; --focus:#2997ff;
+    --tile:#000000; --tile-2:#1d1d1f; --mark:rgba(255,255,255,.14);
+  }
+  /* SF Pro는 애플 시스템 폰트입니다. 문서 지침대로 system-ui/-apple-system을 앞에 두어
+     애플 기기에서는 실제 SF Pro가, 그 외에서는 한글 서체가 잡히도록 했습니다. */
+  :root{
+    --font:system-ui,-apple-system,BlinkMacSystemFont,"Pretendard","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
   }
   *{box-sizing:border-box}
   body{
-    margin:0; background:var(--bg); color:var(--text);
-    font-family:"Pretendard","Apple SD Gothic Neo","Malgun Gothic",system-ui,-apple-system,sans-serif;
-    line-height:1.65; -webkit-font-smoothing:antialiased;
+    margin:0; background:var(--canvas); color:var(--ink);
+    font-family:var(--font); font-size:17px; font-weight:400; line-height:1.47;
+    letter-spacing:-0.374px; -webkit-font-smoothing:antialiased;
+    word-break:keep-all;   /* 한글이 낱말 중간에서 끊기지 않도록 */
   }
-  .wrap{max-width:960px;margin:0 auto;padding:28px 18px 80px}
-  header.top{text-align:center;padding:22px 0 26px}
-  header.top h1{font-size:28px;margin:0 0 8px;letter-spacing:-.5px}
-  header.top p{margin:0;color:var(--muted);font-size:14px}
-  .badge{display:inline-block;background:var(--accent-soft);color:var(--accent);
-    font-size:12px;font-weight:700;padding:4px 10px;border-radius:999px;margin-bottom:12px}
+  ::placeholder{color:var(--ink-48)}
+  :focus-visible{outline:2px solid var(--focus); outline-offset:2px}
+  @media (prefers-reduced-motion:reduce){ *{animation:none!important;transition:none!important} }
 
-  .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
-    padding:18px;margin-bottom:16px;box-shadow:var(--shadow)}
-  .card h2{font-size:16px;margin:0 0 12px;display:flex;align-items:center;gap:8px}
-  .card h2 .n{width:22px;height:22px;border-radius:7px;background:var(--accent);color:#fff;
-    font-size:12px;display:grid;place-items:center;flex:none}
+  /* 얇은 검정 글로벌 내비 — 애플 페이지의 서명 */
+  .gnav{position:sticky;top:0;z-index:10;height:44px;background:#000;color:#fff;
+    display:flex;align-items:center;justify-content:center;
+    font-size:12px;font-weight:400;letter-spacing:-0.12px}
 
-  label.lbl{display:block;font-size:13px;font-weight:600;color:var(--muted);margin:14px 0 6px}
-  input[type=text],input[type=password],textarea,select{
-    width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:10px;
-    background:var(--panel-2);color:var(--text);font-size:14px;font-family:inherit;outline:none}
-  input:focus,textarea:focus,select:focus{border-color:var(--accent)}
-  textarea{min-height:190px;resize:vertical;line-height:1.7}
+  /* 전면 타일 — 배경색 변화 자체가 구획선입니다 */
+  .tile{padding:80px 24px}
+  .tile > *{max-width:var(--inner);margin-inline:auto}
+  .t-white{background:var(--canvas)}
+  .t-parchment{background:var(--parchment)}
 
-  .chips{display:flex;flex-wrap:wrap;gap:8px}
-  .chip{border:1px solid var(--line);background:var(--panel-2);color:var(--muted);
-    padding:8px 14px;border-radius:999px;font-size:14px;cursor:pointer;transition:.15s;user-select:none}
-  .chip:hover{border-color:var(--accent)}
-  .chip.on{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}
+  /* 히어로 */
+  header.top{text-align:center;padding:96px 24px 80px;background:var(--canvas)}
+  header.top h1{
+    font-size:56px;font-weight:600;line-height:1.07;letter-spacing:-0.28px;
+    color:var(--ink);margin:0 0 16px;text-wrap:balance;
+  }
+  header.top p{margin:0 auto;color:var(--ink-80);font-size:28px;font-weight:400;
+    line-height:1.14;letter-spacing:0.196px;max-width:34ch;text-wrap:balance}
+  .badge{display:block;color:var(--ink-48);font-size:14px;letter-spacing:-0.224px;margin-bottom:24px}
 
-  .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:16px}
-  button{font-family:inherit;font-size:14px;border-radius:10px;cursor:pointer;border:1px solid transparent;padding:11px 18px;transition:.15s}
-  .btn-main{background:var(--accent);color:#fff;font-weight:700;flex:1;min-width:180px}
-  .btn-main:hover{filter:brightness(1.08)}
-  .btn-main:disabled{opacity:.55;cursor:progress}
-  .btn-sub{background:var(--panel-2);color:var(--text);border-color:var(--line)}
-  .btn-sub:hover{border-color:var(--accent);color:var(--accent)}
-  .btn-danger{background:transparent;color:var(--warn);border-color:var(--line)}
+  .card h2{
+    font-size:34px;font-weight:600;line-height:1.2;letter-spacing:-0.374px;
+    color:var(--ink);margin:0 0 48px;display:flex;align-items:baseline;gap:16px;
+  }
+  .card h2 .n{color:var(--ink-48);font-size:21px;font-weight:400;font-variant-numeric:tabular-nums}
 
-  .switch{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);cursor:pointer}
-  .switch input{width:16px;height:16px;accent-color:var(--accent)}
+  label.lbl{display:block;font-size:14px;font-weight:600;letter-spacing:-0.224px;
+    color:var(--ink);margin:32px 0 8px}
+  input[type=text],input[type=password]{
+    width:100%;height:44px;padding:12px 20px;border:1px solid var(--hairline);
+    border-radius:var(--r-pill);background:var(--canvas);color:var(--ink);
+    font-size:17px;font-family:inherit;letter-spacing:-0.374px;outline:none;
+  }
+  textarea,select{
+    width:100%;padding:16px 20px;border:1px solid var(--hairline);border-radius:var(--r-lg);
+    background:var(--canvas);color:var(--ink);font-size:17px;font-family:inherit;
+    line-height:1.47;letter-spacing:-0.374px;outline:none;
+  }
+  select{height:44px;padding:0 16px;border-radius:var(--r-sm)}
+  textarea{min-height:220px;resize:vertical}
 
-  details.adv{margin-top:14px;border-top:1px dashed var(--line);padding-top:12px}
-  details.adv summary{cursor:pointer;font-size:13px;color:var(--muted);font-weight:600;list-style:none}
+  /* 카테고리 — 설정 옵션 칩 문법: 알약, 선택 시 2px 파란 테두리 */
+  .chips{display:flex;flex-wrap:wrap;gap:12px}
+  .chip{
+    border:1px solid var(--hairline);background:var(--canvas);color:var(--ink);
+    padding:12px 16px;border-radius:var(--r-pill);font-size:14px;font-weight:400;
+    letter-spacing:-0.224px;cursor:pointer;user-select:none;transition:border-color .2s;
+  }
+  .chip.on{border:2px solid var(--focus);padding:11px 15px}
+
+  .row{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-top:32px}
+  button{font-family:inherit;cursor:pointer;transition:transform .2s;letter-spacing:-0.374px}
+  button:active{transform:scale(.95)}
+  .btn-main{background:var(--link);color:var(--on-primary);border:none;
+    font-size:17px;font-weight:400;border-radius:var(--r-pill);padding:11px 22px;min-height:44px}
+  .btn-main:disabled{background:var(--ink-48);cursor:progress}
+  .btn-sub{background:transparent;color:var(--link);border:1px solid var(--link);
+    font-size:17px;font-weight:400;border-radius:var(--r-pill);padding:11px 22px;min-height:44px}
+  .btn-danger{background:transparent;color:var(--ink-48);border:1px solid var(--hairline);
+    font-size:17px;font-weight:400;border-radius:var(--r-pill);padding:11px 22px;min-height:44px}
+
+  .switch{display:flex;align-items:flex-start;gap:12px;font-size:14px;color:var(--ink-80);
+    cursor:pointer;line-height:1.43;letter-spacing:-0.224px}
+  .switch input{width:18px;height:18px;margin-top:2px;flex:none;accent-color:var(--link)}
+
+  details.adv{margin-top:32px;border-top:1px solid var(--hairline);padding-top:24px}
+  details.adv summary{cursor:pointer;font-size:17px;color:var(--link);list-style:none}
   details.adv summary::-webkit-details-marker{display:none}
-  details.adv summary::before{content:"⚙ ";}
-  .note{font-size:12px;color:var(--muted);background:var(--panel-2);border-left:3px solid var(--line);
-    padding:9px 12px;border-radius:0 8px 8px 0;margin-top:10px}
-  .note.warn{border-left-color:var(--warn);background:var(--warn-bg);color:var(--warn)}
+  .note{font-size:14px;line-height:1.43;letter-spacing:-0.224px;color:var(--ink-80);
+    background:var(--pearl);border:1px solid var(--divider);
+    border-radius:var(--r-md);padding:16px;margin-top:16px}
+  .note.warn{color:var(--ink)}
 
   #result{display:none}
-  .sum-item{display:flex;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}
+
+  /* 3줄 요약 — 가벼운 300 굵기로 숨 쉬게 */
+  .sum-item{display:flex;gap:24px;padding:24px 0;border-bottom:1px solid var(--divider)}
   .sum-item:last-child{border-bottom:none}
-  .sum-item .num{width:26px;height:26px;flex:none;border-radius:8px;background:var(--accent-soft);
-    color:var(--accent);font-weight:800;font-size:13px;display:grid;place-items:center}
+  .sum-item .num{flex:none;color:var(--ink-48);font-size:21px;font-weight:600;
+    line-height:1.5;font-variant-numeric:tabular-nums}
+  .sum-item span:last-child{color:var(--ink);font-size:24px;font-weight:300;
+    line-height:1.5;letter-spacing:0}
 
-  .vocab{border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:10px;background:var(--panel-2)}
-  .vocab .w{font-weight:800;color:var(--accent);font-size:15px}
-  .vocab .tag{font-size:11px;color:var(--muted);border:1px solid var(--line);
-    border-radius:999px;padding:2px 8px;margin-left:8px;background:var(--panel)}
-  .vocab .d{font-size:14px;margin-top:5px}
-  .vocab .ex{font-size:12.5px;color:var(--muted);margin-top:6px;font-style:italic}
+  /* 유틸리티 카드 문법 — 흰 바탕, 1px 헤어라인, 18px 반경 */
+  .vocab{background:var(--canvas);border:1px solid var(--hairline);border-radius:var(--r-lg);
+    padding:24px;margin-bottom:16px}
+  .vocab .w{font-weight:600;color:var(--ink);font-size:17px;line-height:1.24}
+  .vocab .tag{font-size:14px;font-weight:400;color:var(--ink-48);margin-left:12px;letter-spacing:-0.224px}
+  .vocab .d{font-size:17px;margin-top:8px;color:var(--ink);max-width:62ch}
+  .vocab .ex{font-size:14px;color:var(--ink-48);margin-top:12px;letter-spacing:-0.224px;max-width:62ch}
 
-  .legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12.5px;color:var(--muted);margin-bottom:12px}
-  .dot{display:inline-block;width:9px;height:9px;border-radius:3px;margin-right:5px;vertical-align:middle}
-  h3.sub{font-size:13.5px;margin:22px 0 10px;padding-bottom:6px;border-bottom:1px solid var(--line)}
-  .sent{padding:12px 14px;border-radius:10px;margin-bottom:9px;font-size:14.5px;border-left:4px solid}
-  .sent .kind{font-size:11px;font-weight:800;letter-spacing:.3px;display:block;margin-bottom:4px;opacity:.9}
-  .sent .why{display:block;margin-top:7px;font-size:12.5px;color:var(--muted);
-    padding-top:7px;border-top:1px dashed var(--line)}
-  .s-fact{background:var(--fact-bg);border-color:var(--fact)} .s-fact .kind{color:var(--fact)}
-  .s-opin{background:var(--opin-bg);border-color:var(--opin)} .s-opin .kind{color:var(--opin)}
-  .s-quote{background:var(--quote-bg);border-color:var(--quote)} .s-quote .kind{color:var(--quote)}
-  mark{background:rgba(255,214,0,.32);color:inherit;padding:0 2px;border-radius:3px;font-weight:700}
+  /* 사실/의견 — 어두운 타일 위에서 두 묶음으로 나눕니다 */
+  .legend{display:flex;gap:24px;flex-wrap:wrap;font-size:14px;color:var(--ink-80);
+    letter-spacing:-0.224px;margin-bottom:24px}
+  .dot{display:inline-block;width:10px;height:10px;border-radius:var(--r-pill);
+    margin-right:8px;vertical-align:middle}
+  h3.sub{font-size:21px;font-weight:600;line-height:1.19;letter-spacing:0.231px;
+    color:var(--ink);margin:48px 0 20px}
+  .sent{background:var(--canvas);border:1px solid var(--hairline);border-radius:var(--r-lg);
+    padding:24px;margin-bottom:16px;font-size:17px;color:var(--ink);line-height:1.47}
+  .sent .kind{font-size:14px;font-weight:600;display:block;margin-bottom:8px;
+    letter-spacing:-0.224px;color:var(--ink-48)}
+  .sent .why{display:block;margin-top:12px;font-size:14px;color:var(--ink-48);letter-spacing:-0.224px}
+  .s-fact{border-left:4px solid var(--ink)}
+  .s-quote{border-left:4px solid var(--ink-80)}
+  .s-opin{border-left:4px solid var(--ink-48)}
+  mark{background:var(--mark);color:inherit;padding:1px 3px;border-radius:var(--r-xs,5px);font-weight:600}
 
-  .bars{display:flex;height:12px;border-radius:999px;overflow:hidden;margin:4px 0 14px;background:var(--panel-2)}
-  .bars i{display:block}
-  .metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}
-  .metric{background:var(--panel-2);border:1px solid var(--line);border-radius:12px;padding:12px}
-  .metric b{display:block;font-size:22px;letter-spacing:-.5px}
-  .metric span{font-size:12px;color:var(--muted)}
+  .bars{display:flex;height:8px;overflow:hidden;border-radius:var(--r-pill);
+    margin:0 0 32px;background:var(--hairline)}
+  .bars i{display:block;transition:width .4s}
+  .metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:20px}
+  .metric{background:var(--canvas);border:1px solid var(--hairline);
+    border-radius:var(--r-lg);padding:24px}
+  .metric b{display:block;font-size:40px;font-weight:600;line-height:1.1;letter-spacing:0;
+    color:var(--ink);font-variant-numeric:tabular-nums}
+  .metric span{font-size:14px;color:var(--ink-48);letter-spacing:-0.224px}
 
-  .check{display:flex;gap:10px;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--line);font-size:14px}
+  .check{display:flex;gap:16px;align-items:flex-start;padding:24px 0;
+    border-bottom:1px solid var(--divider);font-size:17px}
   .check:last-child{border-bottom:none}
-  .check .ic{flex:none;width:22px;height:22px;border-radius:7px;display:grid;place-items:center;font-size:12px;font-weight:800}
-  .ok{background:var(--fact-bg);color:var(--fact)} .no{background:var(--warn-bg);color:var(--warn)}
-  .check small{display:block;color:var(--muted);font-size:12.5px}
+  .check .ic{flex:none;width:28px;height:28px;display:grid;place-items:center;
+    font-size:14px;font-weight:600;border-radius:var(--r-pill)}
+  .ok{background:var(--pearl);color:var(--ink-48);border:1px solid var(--divider)}
+  .no{background:var(--ink);color:var(--canvas)}
+  .check b{color:var(--ink);font-weight:600;font-size:17px;line-height:1.24}
+  .check small{display:block;color:var(--ink-48);font-size:14px;margin-top:6px;
+    letter-spacing:-0.224px;max-width:62ch}
 
-  table{width:100%;border-collapse:collapse;font-size:13px}
-  th,td{text-align:left;padding:8px 6px;border-bottom:1px solid var(--line)}
-  th{color:var(--muted);font-weight:600;font-size:12px}
-  .statbar{height:8px;border-radius:999px;background:var(--accent);min-width:3px}
-  .empty{color:var(--muted);font-size:13.5px;text-align:center;padding:22px 0}
-  .err{background:var(--warn-bg);color:var(--warn);padding:12px;border-radius:10px;font-size:13.5px;margin-top:12px}
-  .spin{display:inline-block;width:13px;height:13px;border:2px solid rgba(255,255,255,.4);
-    border-top-color:#fff;border-radius:50%;animation:sp .7s linear infinite;margin-right:7px;vertical-align:-2px}
+  .tablewrap{overflow-x:auto}
+  table{width:100%;border-collapse:collapse;font-size:17px}
+  th,td{text-align:left;padding:16px 8px;border-bottom:1px solid var(--divider);
+    color:var(--ink);font-variant-numeric:tabular-nums}
+  th{color:var(--ink-48);font-weight:400;font-size:14px;letter-spacing:-0.224px}
+  .statbar{height:8px;border-radius:var(--r-pill);background:var(--link);min-width:3px;transition:width .4s}
+  .empty{color:var(--ink-48);font-size:17px;padding:24px 0}
+  .err{background:var(--pearl);color:var(--ink);border:1px solid var(--hairline);
+    border-radius:var(--r-md);padding:16px;font-size:14px;margin-top:16px;
+    line-height:1.43;letter-spacing:-0.224px}
+  .spin{display:inline-block;width:13px;height:13px;border:2px solid rgba(255,255,255,.35);
+    border-top-color:#fff;border-radius:50%;animation:sp .7s linear infinite;
+    margin-right:8px;vertical-align:-1px}
   @keyframes sp{to{transform:rotate(360deg)}}
-  footer{text-align:center;color:var(--muted);font-size:12px;padding:24px 0}
+  footer{background:var(--parchment);color:var(--ink-48);font-size:12px;
+    line-height:1.4;letter-spacing:-0.12px;padding:64px 24px;text-align:center}
+
+  @media (max-width:1068px){ header.top h1{font-size:40px} }
+  @media (max-width:734px){
+    .tile{padding:48px 20px}
+    header.top{padding:56px 20px 48px}
+    header.top h1{font-size:34px}
+    header.top p{font-size:21px}
+    .card h2{font-size:28px;margin-bottom:32px}
+    .sum-item span:last-child{font-size:21px}
+    .btn-main,.btn-sub,.btn-danger{width:100%}
+    footer{padding:48px 20px}
+  }
+  @media (max-width:419px){ header.top h1{font-size:28px} }
 </style>
 </head>
 <body>
-<div class="wrap">
+<nav class="gnav">클린 뉴스 &amp; 맥락 번역기</nav>
 
 <header class="top">
   <div class="badge">문해력 · 확증편향 방지 도구</div>
-  <h1>클린 뉴스 &amp; 맥락 번역기</h1>
-  <p>뉴스를 <b>3줄요약</b> · <b>어휘풀이</b> · <b>사실/의견 분리</b>로 다시 읽어 드립니다.</p>
+  <h1>뉴스를 다시 읽습니다.</h1>
+  <p>3줄요약 · 어휘풀이 · 사실과 의견 분리</p>
 </header>
 
 <!-- ── 입력 ── -->
-<section class="card">
+<section class="card tile t-parchment">
   <h2><span class="n">1</span> 분야를 고르세요</h2>
   <div class="chips" id="cats"></div>
 
@@ -154,7 +253,7 @@
     <span>링크에서 본문 자동 가져오기 — 외부 수집 서비스로 <b>주소가 전송</b>됩니다. 끄면 아래에 직접 붙여넣기.</span>
   </label>
 
-  <label class="lbl" for="text">또는 뉴스 본문 붙여넣기 <span style="color:var(--accent)">← 로그인이 필요한 기사는 이 방법이 확실합니다</span></label>
+  <label class="lbl" for="text">또는 뉴스 본문 붙여넣기 <span style="color:var(--muted);font-weight:400">로그인이 필요한 기사는 이 방법이 확실합니다</span></label>
   <textarea id="text" placeholder="기사 제목과 본문을 그대로 붙여넣어 주세요. 기자 이름·저작권 문구 같은 군더더기는 자동으로 걸러냅니다."></textarea>
 
   <div class="row">
@@ -183,32 +282,33 @@
 
 <!-- ── 결과 ── -->
 <div id="result">
-  <section class="card">
+  <section class="card tile t-white">
     <h2><span class="n">2</span> 3줄 요약</h2>
     <div id="summary"></div>
   </section>
 
-  <section class="card">
+  <section class="card tile t-parchment">
     <h2><span class="n">3</span> 어휘 풀이</h2>
     <div id="vocab"></div>
   </section>
 
-  <section class="card">
+  <section class="card tile t-dark">
     <h2><span class="n">4</span> 사실 / 의견 분리</h2>
     <div class="legend">
-      <span><i class="dot" style="background:var(--fact)"></i>사실 — 확인 가능한 정보</span>
-      <span><i class="dot" style="background:var(--opin)"></i>의견·해석 — 누군가의 판단</span>
+      <span><i class="dot" style="background:var(--ink)"></i>사실 — 확인 가능한 정보</span>
+      <span><i class="dot" style="background:var(--ink-80)"></i>인용 — 누군가의 말</span>
+      <span><i class="dot" style="background:var(--ink-48)"></i>의견 — 누군가의 판단</span>
     </div>
     <div class="bars" id="bars"></div>
     <div class="metrics" id="metrics"></div>
 
-    <h3 class="sub" style="color:var(--fact)">확인해 볼 핵심 사실</h3>
+    <h3 class="sub">확인해 볼 핵심 사실</h3>
     <div id="keyfacts"></div>
-    <h3 class="sub" style="color:var(--opin)">기사에 담긴 판단·전망</h3>
+    <h3 class="sub">기사에 담긴 판단·전망</h3>
     <div id="keyopins"></div>
   </section>
 
-  <section class="card">
+  <section class="card tile t-white">
     <h2><span class="n">5</span> 신뢰도 체크리스트</h2>
     <div id="checks"></div>
     <div class="note">체크리스트는 글의 <b>형식</b>만 봅니다. 내용의 진위를 판정하지 않으니, 항상 원문과 다른 매체를 함께 확인하세요.</div>
@@ -216,8 +316,8 @@
 </div>
 
 <!-- ── 기록/통계 ── -->
-<section class="card">
-  <h2><span class="n">6</span> 분석 기록 &amp; 통계 <span style="font-size:12px;color:var(--muted);font-weight:400">(향후 DB 연동용)</span></h2>
+<section class="card tile t-parchment">
+  <h2><span class="n">6</span> 분석 기록</h2>
   <div id="stats"></div>
   <div class="row">
     <button class="btn-sub" id="expJson">JSON 내보내기</button>
@@ -227,7 +327,6 @@
 </section>
 
 <footer>클린 뉴스 &amp; 맥락 번역기 · 모든 분석은 브라우저 안에서 이뤄집니다</footer>
-</div>
 
 <script>
 "use strict";
@@ -638,13 +737,13 @@ function render(r){
   const tot = r.total || 1;
   const pct = k => Math.round(r.cnt[k]/tot*100);
   $("bars").innerHTML =
-    `<i style="width:${pct('fact')}%;background:var(--fact)"></i>
-     <i style="width:${pct('opin')}%;background:var(--opin)"></i>
-     <i style="width:${pct('quote')}%;background:var(--quote)"></i>`;
+    `<i style="width:${pct('fact')}%;background:var(--ink)"></i>
+     <i style="width:${pct('quote')}%;background:var(--ink-80)"></i>
+     <i style="width:${pct('opin')}%;background:var(--ink-48)"></i>`;
   $("metrics").innerHTML =
-    `<div class="metric"><b style="color:var(--fact)">${pct('fact')}%</b><span>사실 서술</span></div>
-     <div class="metric"><b style="color:var(--opin)">${pct('opin')}%</b><span>의견·해석</span></div>
-     <div class="metric"><b style="color:var(--quote)">${pct('quote')}%</b><span>인용</span></div>
+    `<div class="metric"><b>${pct('fact')}%</b><span>사실 서술</span></div>
+     <div class="metric"><b>${pct('quote')}%</b><span>인용</span></div>
+     <div class="metric"><b>${pct('opin')}%</b><span>의견·해석</span></div>
      <div class="metric"><b>${tot}</b><span>전체 문장 · ${esc(r.engine)}</span></div>`;
 
   const list = (arr, cls, lead) => arr.length ? arr.map(it=>
@@ -653,9 +752,9 @@ function render(r){
        ${it.note?`<span class="why">${lead} ${esc(it.note)}</span>`:""}
      </div>`).join("") : null;
 
-  $("keyfacts").innerHTML = list(r.keyFacts,"fact","🔍 확인 포인트 —")
+  $("keyfacts").innerHTML = list(r.keyFacts,"fact","확인 포인트 —")
     || `<div class="empty">검증할 만한 구체적 사실이 잘 보이지 않습니다. 수치나 출처가 없는 기사일 수 있습니다.</div>`;
-  $("keyopins").innerHTML = list(r.keyOpins,"opin","💬")
+  $("keyopins").innerHTML = list(r.keyOpins,"opin","판단 주체 —")
     || `<div class="empty">두드러진 판단·전망 없이 사실 위주로 쓰인 기사입니다.</div>`;
 
   $("checks").innerHTML = r.checks.map(c=>
@@ -707,18 +806,18 @@ function renderStats(){
        <div class="metric"><b>${avg}%</b><span>평균 의견 비중</span></div>
        <div class="metric"><b>${logs[0].category}</b><span>최근 분야</span></div>
      </div>
-     <table><thead><tr><th>분야</th><th style="width:45%">건수</th><th>평균 의견 비중</th></tr></thead><tbody>
+     <div class="tablewrap"><table><thead><tr><th>분야</th><th style="width:45%">건수</th><th>평균 의견 비중</th></tr></thead><tbody>
      ${CATS.map(c=>`<tr><td>${c}</td>
         <td><div style="display:flex;align-items:center;gap:8px">
           <div class="statbar" style="width:${per[c].n/max*100}%"></div><span>${per[c].n}</span></div></td>
         <td>${per[c].n?Math.round(per[c].op/per[c].n*100)+"%":"-"}</td></tr>`).join("")}
      </tbody></table>
-     <table style="margin-top:16px"><thead><tr><th>일시</th><th>분야</th><th>제목</th><th>의견</th></tr></thead><tbody>
+     <div class="tablewrap"><table style="margin-top:32px"><thead><tr><th>일시</th><th>분야</th><th>제목</th><th>의견</th></tr></thead><tbody>
      ${logs.slice(0,8).map(l=>`<tr>
         <td style="white-space:nowrap">${new Date(l.analyzed_at).toLocaleDateString("ko-KR",{month:"2-digit",day:"2-digit"})}</td>
         <td>${esc(l.category)}</td><td>${esc(l.title.slice(0,34))}</td>
         <td>${Math.round(l.opinion_ratio*100)}%</td></tr>`).join("")}
-     </tbody></table>`;
+     </tbody></table></div>`;
 }
 
 /* 내려받기 — 공유 링크로 열었을 때와 파일로 열었을 때 모두 동작합니다 */
