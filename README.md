@@ -1,5 +1,7 @@
 # 클린 뉴스 & 맥락 번역기
 
+### ▶ [바로 써보기](https://cleannews.vercel.app/)
+
 뉴스 기사를 **3줄요약 · 어휘풀이 · 사실/의견 분리**로 다시 읽어 주는 웹 도구입니다.
 
 청소년·청년층의 문해력 저하와, 가짜 뉴스로 인한 확증편향을 함께 겨냥해 만들었습니다.
@@ -132,7 +134,8 @@ open index.html           # macOS
 ### 웹에 올리기
 
 정적 사이트이므로 어디에나 올라갑니다. 저장소를 Vercel·Netlify·GitHub Pages에 연결하면
-바로 배포됩니다.
+바로 배포됩니다. 이 저장소는 Vercel에 연결돼 있어, `master`에 푸시하면
+[cleannews.vercel.app](https://cleannews.vercel.app/)에 자동으로 반영됩니다.
 
 > 정적 호스팅은 루트 주소로 들어오면 `index.html`을 찾습니다. 파일 이름을 바꾸면
 > 404가 뜨니 주의하세요.
