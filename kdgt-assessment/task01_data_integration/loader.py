@@ -33,6 +33,7 @@ class Code:
     KEY_CONFLICT = "KEY_CONFLICT"          # DB에 같은 키가 다른 내용으로 이미 있음
     UNKNOWN_LOT = "UNKNOWN_LOT"            # 자재 LOT 등록부에 없는 LOT
     UNKNOWN_PROJECT = "UNKNOWN_PROJECT"    # 수주에 없는 프로젝트
+    NO_RECEIPT = "NO_RECEIPT"              # 등록된 LOT 이지만 정상 입고 기록 없이 검사됨
     QTY_NEGATIVE = "QTY_NEGATIVE"          # 수량 < 0
     QTY_ZERO = "QTY_ZERO"                  # 수량 = 0
     QTY_INVALID = "QTY_INVALID"            # 숫자가 아님 / 정수여야 하는데 소수
@@ -44,6 +45,7 @@ class Code:
 CATEGORY_OF_CODE = {
     Code.DUPLICATE_IN_FILE: "중복", Code.KEY_CONFLICT: "중복",
     Code.UNKNOWN_LOT: "미등록 LOT", Code.UNKNOWN_PROJECT: "미등록 프로젝트",
+    Code.NO_RECEIPT: "입고 없는 검사",
     Code.QTY_NEGATIVE: "음수수량", Code.QTY_ZERO: "수량오류", Code.QTY_INVALID: "수량오류",
     Code.DATE_INVALID: "날짜오류", Code.DATE_SEQUENCE: "날짜오류",
     Code.MISSING_FIELD: "필수값 누락", Code.VALUE_INVALID: "허용값 오류",
@@ -87,8 +89,8 @@ def _check_inspection_after_receipt(rec: dict, conn: sqlite3.Connection) -> list
     ).fetchone()
     first = row[0]
     if first is None:
-        # 등록된 LOT 이지만 정상 입고 기록이 없음 → 검사 불가
-        return [Issue(Code.DATE_SEQUENCE, f"LOT {rec['lot_no']} 의 정상 입고 기록 없이 검사됨")]
+        # 등록된 LOT 이지만 정상 입고 기록이 없음 → 날짜 문제가 아니라 관계(검사→입고) 단절
+        return [Issue(Code.NO_RECEIPT, f"LOT {rec['lot_no']} 의 정상 입고 기록 없이 검사됨")]
     if when.isoformat() < first:
         return [Issue(Code.DATE_SEQUENCE, f"검사일({when})이 최초 입고일({first})보다 빠름")]
     return []

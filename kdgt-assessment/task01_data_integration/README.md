@@ -12,7 +12,7 @@ python -m task01_data_integration.cli load       # 한 번 더 → 신규 0, 건
 python -m task01_data_integration.cli broken     # 관계가 끊긴 행 조회
 python -m task01_data_integration.cli report     # reports/error_report.{md,csv}
 python -m task01_data_integration.cli verify     # 완료 기준 자동 검증 → reports/verification.md
-python -m pytest                                 # 단위/시나리오 테스트 22개
+python -m pytest                                 # 단위/시나리오 테스트 23개
 ```
 
 필요: Python 3.11 이상. 런타임 외부 라이브러리 없음(SQLite 내장). 테스트만 `pytest`.
@@ -59,6 +59,7 @@ python -m pytest                                 # 단위/시나리오 테스트
 | DUPLICATE_IN_FILE | 중복 | 같은 파일 안 키 중복 |
 | KEY_CONFLICT | 중복 | DB에 같은 키가 다른 내용으로 존재 |
 | UNKNOWN_LOT / UNKNOWN_PROJECT | 관계 단절 | 등록부에 없는 참조 |
+| NO_RECEIPT | 관계 단절 | 등록된 LOT 이지만 정상 입고 없이 검사됨 |
 | QTY_NEGATIVE / QTY_ZERO / QTY_INVALID | 수량 | 음수 / 0 / 숫자 아님·정수 아님 |
 | DATE_INVALID / DATE_SEQUENCE | 날짜 | 형식·존재 / 선후관계 |
 | MISSING_FIELD / VALUE_INVALID | 기타 | 필수값 누락 / 허용값 밖, LOT-프로젝트 불일치 |

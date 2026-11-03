@@ -105,8 +105,10 @@ CREATE TABLE IF NOT EXISTS quarantine (
     UNIQUE (source_file, source_row, row_hash)
 );
 
--- 관계가 끊긴 행: 참조 대상(LOT/프로젝트)이 등록부에 없어 격리된 행
-CREATE VIEW IF NOT EXISTS v_broken_relations AS
+-- 관계가 끊긴 행: 참조 대상(LOT/프로젝트)이 없거나, 검사 대상 LOT 의 입고가 없어 격리된 행
+-- (뷰는 정의가 바뀔 수 있으므로 매번 다시 만든다. 기존 DB 에도 새 정의가 반영되도록)
+DROP VIEW IF EXISTS v_broken_relations;
+CREATE VIEW v_broken_relations AS
 SELECT q.source_file,
        q.source_row,
        q.entity,
@@ -117,11 +119,13 @@ SELECT q.source_file,
        q.reason_detail
 FROM quarantine q
 WHERE q.resolved_batch_id IS NULL
-  AND (q.reason_codes LIKE '%UNKNOWN_LOT%' OR q.reason_codes LIKE '%UNKNOWN_PROJECT%')
+  AND (q.reason_codes LIKE '%UNKNOWN_LOT%' OR q.reason_codes LIKE '%UNKNOWN_PROJECT%'
+       OR q.reason_codes LIKE '%NO_RECEIPT%')
 ORDER BY q.source_file, q.source_row;
 
 -- 프로젝트-LOT 연결 요약 (통합 결과 확인용)
-CREATE VIEW IF NOT EXISTS v_project_lot_summary AS
+DROP VIEW IF EXISTS v_project_lot_summary;
+CREATE VIEW v_project_lot_summary AS
 SELECT p.project_id,
        m.lot_no,
        m.material,

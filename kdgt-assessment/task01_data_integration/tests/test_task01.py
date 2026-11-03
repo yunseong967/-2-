@@ -185,3 +185,18 @@ def test_failure_mid_batch_rolls_back(conn, data_dir, monkeypatch):
     with pytest.raises(RuntimeError):
         L.load_directory(conn, data_dir)
     assert table_counts(conn, ALL) == before  # 앞 파일(receipts) 신규 행도 롤백
+
+
+def test_inspection_on_lot_without_receipt_is_broken_relation(conn, data_dir):
+    """등록된 LOT 이지만 정상 입고가 없는 상태의 검사 = 관계 단절(검사→입고).
+    날짜오류로 분류되면 v_broken_relations 에서 조회되지 않는다(AI_LOG 오류 #1)."""
+    append_row(data_dir / "materials.csv", {
+        "lot_no": "L2026-0500", "project_id": "P2026-001", "material_code": "M-SUS304",
+        "material": "SUS304", "thickness_mm": "6", "unit": "KG"})
+    append_row(data_dir / "inspections.csv", {
+        "inspection_id": "I2026-0500", "lot_no": "L2026-0500", "inspected_date": "2026-12-01",
+        "result": "PASS", "inspected_qty": "5"})
+    load_directory(conn, data_dir)
+    got = conn.execute("SELECT reason_codes FROM quarantine WHERE record_key='I2026-0500'").fetchone()[0]
+    assert got == "NO_RECEIPT"
+    assert "I2026-0500" in [b["record_key"] for b in broken_relations(conn)]
