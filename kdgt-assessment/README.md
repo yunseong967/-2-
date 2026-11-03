@@ -35,6 +35,7 @@ Python 3.11 이상. 런타임은 표준 라이브러리만 사용합니다(SQLit
 
 ## 공통 규칙
 
+- AI 도구: Claude 단독 사용 (출제자 승인, `docs/ai-policy.md`)
 - 과제 폴더 하나 = 독립 실행 단위. 공통 코드는 `common/`에서 재사용
 - 과제마다 포함할 것: `README.md`(실행 안내·설계 판단), 샘플 데이터 + 정답, `verify` 명령과 `reports/verification.md`, `tests/`, `AI_LOG.md`
 - 시연 영상(3분)은 저장소 밖에 보관하고 링크만 README에 기재
