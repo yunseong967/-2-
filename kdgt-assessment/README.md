@@ -16,11 +16,12 @@ python -m task05_quote_model.cli train          # 과제 05 학습·평가·누�
 python -m task06_lot_traceability.cli verify    # 과제 06 완료 기준 검증
 python -m task03_bom_revision.cli serve         # 과제 03 개정 비교 화면 http://127.0.0.1:8003
 python -m task06_lot_traceability.cli serve     # 과제 06 추적 화면 http://127.0.0.1:8006
+python -m task07_qa_agent.cli eval --backend mock   # 과제 07 하네스 점검 (실제 평가: --backend claude, API 키 필요)
 python -m task09_delivery_kpi.cli verify        # 과제 09 정답 대조·일정 규칙 검사
 python -m task09_delivery_kpi.cli serve         # 과제 09 일정 비교 화면 http://127.0.0.1:8009
 ```
 
-Python 3.11 이상. 외부 라이브러리는 `openpyxl`(과제 04), `numpy`·`pandas`·`scikit-learn`(과제 05) 이며 나머지 과제는 표준 라이브러리(SQLite 내장)만 씁니다.
+Python 3.11 이상. 외부 라이브러리는 `openpyxl`(과제 04), `numpy`·`pandas`·`scikit-learn`(과제 05), `anthropic`(과제 07) 이며 나머지 과제는 표준 라이브러리(SQLite 내장)만 씁니다.
 
 ## 과제 현황
 
@@ -32,7 +33,7 @@ Python 3.11 이상. 외부 라이브러리는 `openpyxl`(과제 04), `numpy`·`p
 | 04 | 근거를 보여주는 자동 견적 | 구현·검증 완료 | [task04_auto_quote](task04_auto_quote/README.md) |
 | 05 | 견적 예측 모델의 타당성 | 구현·검증 완료 | [task05_quote_model](task05_quote_model/README.md) |
 | 06 | LOT 양방향 추적과 출하 차단 | 구현·검증 완료 | [task06_lot_traceability](task06_lot_traceability/README.md) |
-| 07 | 입출하 질의응답 AI Agent | 예정 | |
+| 07 | 입출하 질의응답 AI Agent | 구현 완료 · **실제 Claude 평가는 API 키로 실행 필요** | [task07_qa_agent](task07_qa_agent/README.md) |
 | 08 | 공정 이벤트 수집과 가시화 | 예정 | |
 | 09 | 납기 분석과 KPI 계산 | 구현·검증 완료 | [task09_delivery_kpi](task09_delivery_kpi/README.md) |
 | 10 | 배포·권한·장애 복구 | 예정 | |
@@ -55,6 +56,7 @@ kdgt-assessment/
 ├── task04_auto_quote/         과제 04
 ├── task05_quote_model/        과제 05
 ├── task06_lot_traceability/   과제 06
+├── task07_qa_agent/           과제 07
 ├── task09_delivery_kpi/       과제 09
 └── pytest.ini
 ```
