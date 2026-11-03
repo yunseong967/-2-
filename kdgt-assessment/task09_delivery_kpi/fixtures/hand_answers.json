@@ -1,0 +1,55 @@
+{
+  "_설명": "엔진 실행 전에 손으로 추적한 정답 (hand_answers.md 에 단계별 근거). as_of = 2026-11-03T00:00",
+  "projects": {
+    "P01": {
+      "pack_done": "2026-09-03T17:00",
+      "ship_done": "2026-09-04T12:00",
+      "mfg_h": 585,
+      "o2s_h": 771,
+      "plan_ship": "2026-09-04T12:00",
+      "warnings": []
+    },
+    "P02": {
+      "pack_done": "2026-09-07T17:00",
+      "ship_done": "2026-09-08T12:00",
+      "mfg_h": 633,
+      "o2s_h": 818,
+      "plan_ship": "2026-09-07T12:00",
+      "shift_h": 24,
+      "warnings": []
+    },
+    "P03": {
+      "laser_start": "2026-08-13T08:00",
+      "laser_wait_h": 72,
+      "out_arrival": "2026-08-18T08:00",
+      "pack_done": "2026-08-28T17:00",
+      "ship_done": "2026-08-31T12:00",
+      "mfg_h": 441,
+      "o2s_h": 646,
+      "plan_ship": "2026-08-31T12:00",
+      "warnings": []
+    },
+    "P04": {
+      "pack_done": "2026-09-15T17:00",
+      "ship_done": "2026-09-16T12:00",
+      "mfg_h": 657,
+      "o2s_h": 699,
+      "plan_ship": "2026-09-16T12:00",
+      "warnings": [
+        "DUE_MISS",
+        "DUE_IMPOSSIBLE"
+      ]
+    },
+    "P05": {
+      "out_arrival": "2026-11-12T08:00",
+      "mfg_h": null,
+      "o2s_h": null,
+      "excluded": true,
+      "warnings": [
+        "DUE_MISS",
+        "DUE_UNRECOVERABLE"
+      ],
+      "plan_ship": "2026-09-29T12:00"
+    }
+  }
+}

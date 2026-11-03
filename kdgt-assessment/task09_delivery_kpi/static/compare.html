@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>납기·리드타임 분석</title>
+<style>
+  :root {
+    --bg: #f6f7f9; --panel: #fff; --text: #1d2330; --muted: #667085; --line: #e3e6eb; --grid: #eef0f3;
+    --accent: #2457c5; --plan: #b8c2d3; --ok: #18794e; --ok-bg: #e6f4ec; --bad: #b42318; --bad-bg: #fdecea;
+    --warn: #a15c07; --warn-bg: #fef3e2;
+    --c-OUTSOURCE: #8a94a6; --c-LASER: #2f6fdb; --c-WELD: #d9822b; --c-BUFF: #8e5bd9; --c-INSP: #1f9d8a; --c-PACK: #c2410c; --c-SHIP: #18794e; --c-RT: #8a94a6;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #12151b; --panel: #1b2029; --text: #e6e9ef; --muted: #98a2b3; --line: #2c3340; --grid: #232934;
+      --accent: #7aa2ff; --plan: #4a5466; --ok: #5fd49a; --ok-bg: #163326; --bad: #ff8a80; --bad-bg: #3a1a18;
+      --warn: #f5b54a; --warn-bg: #3a2a10;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text);
+         font: 14px/1.5 -apple-system, "Segoe UI", "Malgun Gothic", "Apple SD Gothic Neo", sans-serif; }
+  header { padding: 16px; background: var(--panel); border-bottom: 1px solid var(--line); }
+  h1 { margin: 0 0 8px; font-size: 18px; }
+  .bar { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; color: var(--muted); font-size: 13px; }
+  input, button { padding: 7px 10px; border: 1px solid var(--line); border-radius: 6px; background: var(--panel); color: var(--text); font: inherit; }
+  button { background: var(--accent); border-color: var(--accent); color: #fff; cursor: pointer; }
+  main { padding: 16px; max-width: 1280px; margin: 0 auto; display: grid; gap: 16px; }
+  section { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 14px; overflow-x: auto; }
+  h2 { margin: 0 0 10px; font-size: 15px; }
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; }
+  .card { border: 1px solid var(--line); border-radius: 8px; padding: 12px; }
+  .card .v { font-size: 26px; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .card .s { color: var(--muted); font-size: 12px; }
+  table { border-collapse: collapse; width: 100%; font-size: 13px; }
+  th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+  th { color: var(--muted); font-weight: 600; } td.num { text-align: right; font-variant-numeric: tabular-nums; }
+  .badge { display: inline-block; padding: 1px 8px; border-radius: 10px; font-size: 12px; font-weight: 600; }
+  .ok { color: var(--ok); background: var(--ok-bg); } .bad { color: var(--bad); background: var(--bad-bg); } .warn { color: var(--warn); background: var(--warn-bg); }
+  .muted { color: var(--muted); }
+  .legend { display: flex; gap: 12px; flex-wrap: wrap; font-size: 12px; color: var(--muted); margin-bottom: 8px; }
+  .legend i { display: inline-block; width: 12px; height: 10px; border-radius: 2px; margin-right: 4px; vertical-align: -1px; }
+  svg text { fill: var(--text); font-size: 11px; } svg .axis { fill: var(--muted); }
+</style>
+</head>
+<body>
+<header>
+  <h1>납기·리드타임 분석 <span class="muted" style="font-weight:400;font-size:13px">프로젝트 20건 · 계획(지연 전) vs 실제(지연 반영)</span></h1>
+  <div class="bar">기준 시점 <input type="datetime-local" id="asof" value="2026-11-03T00:00"><button id="go">다시 계산</button>
+    <span>리드타임 = 경과 시간(달력 h, KST). 기준 시점까지 끝나지 않은 프로젝트는 평균에서 제외</span></div>
+</header>
+<main>
+  <section><h2>KPI (사업계획서 정의)</h2><div class="cards" id="kpi"></div></section>
+  <section><h2>일정 경고</h2><div id="warn"></div></section>
+  <section><h2>프로젝트별 출하 예정 비교</h2><div id="tbl"></div></section>
+  <section><h2>일정표 (각 프로젝트 위: 계획 / 아래: 실제)</h2><div class="legend" id="legend"></div><div id="gantt"></div></section>
+</main>
+<script>
+const $ = s => document.querySelector(s);
+const esc = v => String(v ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const RES = {OUTSOURCE: "외주", LASER: "레이저", WELD: "용접", BUFF: "버핑", INSP: "검사", PACK: "포장", SHIP: "출하"};
+const fmt = s => s ? s.replace("T", " ").slice(5, 16) : "-";
+const num = v => v === null || v === undefined ? "-" : Number(v).toLocaleString("ko-KR", {maximumFractionDigits: 2});
+const SEV = {DUE_IMPOSSIBLE: "bad", DUE_UNRECOVERABLE: "bad", PRECEDENCE_CYCLE: "bad", DUE_MISS: "warn", WO_BEFORE_ORDER: "warn"};
+
+function kpiCard(k, label) {
+  const bp = k.business_plan;
+  return `<div class="card"><div class="s">${esc(label)} · ${esc(k.label)}</div>
+    <div class="v">${num(k.mean_h)}<span style="font-size:14px"> h</span></div>
+    <div class="s">완료 ${k.n}건 평균 · 중앙값 ${num(k.median_h)}h · 미완료 제외 ${k.excluded_incomplete.length}건</div>
+    <div class="s">${esc(k.formula)}</div>
+    <div class="s">사업계획서: 구축 전 ${bp.before.toLocaleString()}h → 목표 ${bp.target.toLocaleString()}h</div></div>`;
+}
+
+async function load() {
+  const r = await fetch(`/api/compare?as_of=${encodeURIComponent($("#asof").value)}`);
+  const d = await r.json();
+  if (!r.ok) { $("#kpi").innerHTML = `<div class="badge bad">${esc(d.message)}</div>`; return; }
+  $("#kpi").innerHTML = kpiCard(d.kpi_actual.mfg_h, "실적") + kpiCard(d.kpi_actual.o2s_h, "실적")
+    + kpiCard(d.kpi_forecast.mfg_h, "예상(전체 일정 완료 시)") + kpiCard(d.kpi_forecast.o2s_h, "예상(전체 일정 완료 시)")
+    + `<div class="card"><div class="s">계산 대상</div><div class="v">${d.kpi_actual.n_total - d.kpi_actual.n_unschedulable}<span style="font-size:14px"> / ${d.kpi_actual.n_total}건</span></div>
+       <div class="s">일정 계산 불가 ${d.kpi_actual.n_unschedulable}건 (${esc(d.unschedulable.join(", "))}) · 실적 미완료: ${esc(d.kpi_actual.mfg_h.excluded_incomplete.join(", "))}</div></div>`;
+  $("#warn").innerHTML = d.warnings.length ? `<table><tr><th>프로젝트</th><th>구분</th><th>내용</th></tr>${d.warnings.map(w =>
+    `<tr><td>${esc(w.project_id)}</td><td><span class="badge ${SEV[w.code] || "warn"}">${esc(w.code)}</span></td><td>${esc(w.message)}</td></tr>`).join("")}</table>` : "경고 없음";
+  $("#tbl").innerHTML = `<table><tr><th>프로젝트</th><th>품명</th><th>납기</th><th>외주 지연</th><th>계획 출하</th><th>실제 출하</th><th class="num">변화(h)</th><th>납기 판정 (계획→실제)</th></tr>
+    ${d.rows.map(x => `<tr><td>${esc(x.project_id)}</td><td>${esc(x.name)}</td><td>${esc(x.due_date)}</td>
+      <td>${Object.entries(x.delays).map(([k, v]) => `${k} +${v}일`).join(", ") || "-"}</td>
+      <td>${fmt(x.plan_ship)}</td><td>${fmt(x.actual_ship)}</td><td class="num">${x.shift_h === null ? "-" : (x.shift_h > 0 ? "+" : "") + num(x.shift_h)}</td>
+      <td>${x.actual_ship === null ? '<span class="badge bad">계산 불가</span>' :
+          `<span class="badge ${x.plan_late ? "bad" : "ok"}">${x.plan_late ? "지연" : "준수"}</span> → <span class="badge ${x.actual_late ? "bad" : "ok"}">${x.actual_late ? "지연" : "준수"}</span>`}</td></tr>`).join("")}</table>`;
+  gantt(d);
+}
+
+function gantt(d) {
+  const all = [...Object.values(d.plan_ops), ...Object.values(d.actual_ops)].flat();
+  const t0 = new Date(Math.min(...all.map(o => +new Date(o.start)))), t1 = new Date(Math.max(...all.map(o => +new Date(o.end))));
+  t0.setDate(1);
+  const L = 70, W = Math.max(900, document.querySelector("main").clientWidth - 60), rowH = 11, gap = 8;
+  const ids = d.rows.map(r => r.project_id).filter(id => d.actual_ops[id]);
+  const H = 24 + ids.length * (rowH * 2 + gap);
+  const x = t => L + (new Date(t) - t0) / (t1 - t0) * (W - L - 10);
+  let s = `<svg width="${W}" height="${H}" role="img" aria-label="프로젝트별 계획 대비 실제 공정 일정">`;
+  for (let m = new Date(t0); m <= t1; m.setMonth(m.getMonth() + 1)) {
+    const xx = x(m);
+    s += `<line x1="${xx}" x2="${xx}" y1="14" y2="${H}" stroke="var(--grid)"/><text class="axis" x="${xx + 3}" y="11">${m.getFullYear() % 100}.${m.getMonth() + 1}</text>`;
+  }
+  const asof = x(d.as_of);
+  s += `<line x1="${asof}" x2="${asof}" y1="14" y2="${H}" stroke="var(--accent)" stroke-dasharray="4 3"/><text x="${asof + 3}" y="${H - 2}" style="fill:var(--accent)">기준 시점</text>`;
+  ids.forEach((id, i) => {
+    const y = 20 + i * (rowH * 2 + gap), row = d.rows.find(r => r.project_id === id);
+    s += `<text x="0" y="${y + rowH + 4}">${id}</text>`;
+    const due = x(row.due_date + "T23:59");
+    s += `<line x1="${due}" x2="${due}" y1="${y - 2}" y2="${y + rowH * 2 + 2}" stroke="var(--bad)" stroke-width="2"><title>납기 ${row.due_date}</title></line>`;
+    for (const [k, lane] of [["plan_ops", 0], ["actual_ops", 1]]) {
+      for (const o of d[k][id] || []) {
+        const fill = lane === 0 ? "var(--plan)" : `var(--c-${o.resource === "OUTSOURCE" ? "OUTSOURCE" : o.resource})`;
+        const x0 = x(o.start), w = Math.max(1.5, x(o.end) - x0);
+        s += `<rect x="${x0}" y="${y + lane * rowH}" width="${w}" height="${rowH - 2}" rx="2" fill="${fill}"><title>${id} ${o.op} (${RES[o.resource]})${lane ? " 실제" : " 계획"}\n${fmt(o.start)} → ${fmt(o.end)}${o.wait_h ? `\n자원 대기 ${o.wait_h}h` : ""}${o.delay_days ? `\n외주 지연 +${o.delay_days}일` : ""}</title></rect>`;
+      }
+    }
+  });
+  $("#gantt").innerHTML = s + "</svg>";
+  $("#legend").innerHTML = `<span><i style="background:var(--plan)"></i>계획(지연 전)</span>` +
+    Object.entries(RES).map(([k, v]) => `<span><i style="background:var(--c-${k})"></i>${v}</span>`).join("") +
+    `<span><i style="background:var(--bad)"></i>납기</span><span><i style="background:var(--accent)"></i>기준 시점</span>`;
+}
+$("#go").addEventListener("click", load);
+load();
+</script>
+</body>
+</html>
