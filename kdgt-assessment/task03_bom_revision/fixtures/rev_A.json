@@ -1,0 +1,206 @@
+{
+  "product_no": "RX-500",
+  "drawing_no": "DWG-RX500",
+  "revision": "A",
+  "effective_date": "2026-03-01",
+  "note": "최초 출도",
+  "items": [
+    {
+      "part_no": "RX-500",
+      "name": "반응기 500L",
+      "kind": "ASSEMBLY"
+    },
+    {
+      "part_no": "SA-SHELL",
+      "name": "쉘 조립",
+      "kind": "ASSEMBLY"
+    },
+    {
+      "part_no": "SA-NOZZLE",
+      "name": "노즐 조립 50A",
+      "kind": "ASSEMBLY"
+    },
+    {
+      "part_no": "SA-JACKET",
+      "name": "자켓 조립",
+      "kind": "ASSEMBLY"
+    },
+    {
+      "part_no": "PL-SHELL",
+      "name": "쉘 판",
+      "kind": "PART",
+      "material": "SUS304",
+      "thickness": {
+        "value": 6,
+        "unit": "mm"
+      }
+    },
+    {
+      "part_no": "HD-TOP",
+      "name": "상부 경판",
+      "kind": "PART",
+      "material": "SUS304",
+      "thickness": {
+        "value": 8,
+        "unit": "mm"
+      }
+    },
+    {
+      "part_no": "HD-BTM",
+      "name": "하부 경판",
+      "kind": "PART",
+      "material": "SUS304",
+      "thickness": {
+        "value": 8,
+        "unit": "mm"
+      }
+    },
+    {
+      "part_no": "NZ-50A",
+      "name": "노즐 50A",
+      "kind": "PART",
+      "material": "SUS304"
+    },
+    {
+      "part_no": "FL-50A",
+      "name": "플랜지 50A",
+      "kind": "PART",
+      "material": "SUS304"
+    },
+    {
+      "part_no": "GSK-50A",
+      "name": "가스켓 50A",
+      "kind": "PART",
+      "material": "PTFE"
+    },
+    {
+      "part_no": "BOLT-M16",
+      "name": "볼트 M16",
+      "kind": "PART",
+      "material": "SUS304"
+    },
+    {
+      "part_no": "PL-JKT",
+      "name": "자켓 판",
+      "kind": "PART",
+      "material": "SS400",
+      "thickness": {
+        "value": 4.5,
+        "unit": "mm"
+      }
+    },
+    {
+      "part_no": "PIPE-25A",
+      "name": "자켓 배관 25A",
+      "kind": "PART",
+      "material": "SUS304"
+    },
+    {
+      "part_no": "ELB-25A",
+      "name": "엘보 25A",
+      "kind": "PART",
+      "material": "SUS304"
+    },
+    {
+      "part_no": "LEG",
+      "name": "다리 (각관)",
+      "kind": "PART",
+      "material": "SS400"
+    },
+    {
+      "part_no": "LUG",
+      "name": "러그",
+      "kind": "PART",
+      "material": "SS400",
+      "thickness": {
+        "value": 1,
+        "unit": "cm"
+      }
+    }
+  ],
+  "lines": [
+    {
+      "parent": "RX-500",
+      "child": "SA-SHELL",
+      "qty": 1
+    },
+    {
+      "parent": "RX-500",
+      "child": "SA-JACKET",
+      "qty": 1
+    },
+    {
+      "parent": "RX-500",
+      "child": "LEG",
+      "qty": 4,
+      "length": {
+        "value": 0.8,
+        "unit": "m"
+      }
+    },
+    {
+      "parent": "RX-500",
+      "child": "LUG",
+      "qty": 4
+    },
+    {
+      "parent": "SA-SHELL",
+      "child": "PL-SHELL",
+      "qty": 2
+    },
+    {
+      "parent": "SA-SHELL",
+      "child": "HD-TOP",
+      "qty": 1
+    },
+    {
+      "parent": "SA-SHELL",
+      "child": "HD-BTM",
+      "qty": 1
+    },
+    {
+      "parent": "SA-SHELL",
+      "child": "SA-NOZZLE",
+      "qty": 3
+    },
+    {
+      "parent": "SA-NOZZLE",
+      "child": "NZ-50A",
+      "qty": 1
+    },
+    {
+      "parent": "SA-NOZZLE",
+      "child": "FL-50A",
+      "qty": 1
+    },
+    {
+      "parent": "SA-NOZZLE",
+      "child": "GSK-50A",
+      "qty": 1
+    },
+    {
+      "parent": "SA-NOZZLE",
+      "child": "BOLT-M16",
+      "qty": 4
+    },
+    {
+      "parent": "SA-JACKET",
+      "child": "PL-JKT",
+      "qty": 2
+    },
+    {
+      "parent": "SA-JACKET",
+      "child": "PIPE-25A",
+      "qty": 4,
+      "length": {
+        "value": 1250,
+        "unit": "mm"
+      }
+    },
+    {
+      "parent": "SA-JACKET",
+      "child": "ELB-25A",
+      "qty": 6
+    }
+  ]
+}

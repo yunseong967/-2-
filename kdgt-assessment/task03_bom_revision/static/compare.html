@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BOM 개정 비교</title>
+<style>
+  :root {
+    --bg: #f6f7f9; --panel: #fff; --text: #1d2330; --muted: #667085; --line: #e3e6eb; --accent: #2457c5;
+    --add: #18794e; --add-bg: #e6f4ec; --del: #b42318; --del-bg: #fdecea; --chg: #a15c07; --chg-bg: #fef3e2;
+    --spec: #5b3cc4; --spec-bg: #efeafd;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #12151b; --panel: #1b2029; --text: #e6e9ef; --muted: #98a2b3; --line: #2c3340; --accent: #7aa2ff;
+      --add: #5fd49a; --add-bg: #163326; --del: #ff8a80; --del-bg: #3a1a18; --chg: #f5b54a; --chg-bg: #3a2a10;
+      --spec: #b9a6ff; --spec-bg: #2a2240;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text);
+         font: 14px/1.5 -apple-system, "Segoe UI", "Malgun Gothic", "Apple SD Gothic Neo", sans-serif; }
+  header { padding: 16px; background: var(--panel); border-bottom: 1px solid var(--line); }
+  h1 { margin: 0 0 10px; font-size: 18px; }
+  .bar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  label { color: var(--muted); font-size: 13px; display: flex; gap: 6px; align-items: center; }
+  select, input, button { padding: 7px 10px; border: 1px solid var(--line); border-radius: 6px; background: var(--panel);
+                          color: var(--text); font: inherit; }
+  button.primary { background: var(--accent); border-color: var(--accent); color: #fff; cursor: pointer; }
+  button { cursor: pointer; }
+  .seg button { border-radius: 0; margin-left: -1px; } .seg button:first-child { border-radius: 6px 0 0 6px; }
+  .seg button:last-child { border-radius: 0 6px 6px 0; } .seg button.on { background: var(--accent); color: #fff; border-color: var(--accent); }
+  main { padding: 16px; max-width: 1200px; margin: 0 auto; display: grid; gap: 16px; }
+  section { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 14px; overflow-x: auto; }
+  h2 { margin: 0 0 10px; font-size: 15px; }
+  table { border-collapse: collapse; width: 100%; font-size: 13px; }
+  th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+  th { color: var(--muted); font-weight: 600; }
+  td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+  .badge { display: inline-block; padding: 1px 8px; border-radius: 10px; font-size: 12px; font-weight: 600; }
+  .ADDED { color: var(--add); background: var(--add-bg); } .REMOVED { color: var(--del); background: var(--del-bg); }
+  .QTY_CHANGED, .LENGTH_CHANGED { color: var(--chg); background: var(--chg-bg); } .SPEC { color: var(--spec); background: var(--spec-bg); }
+  .up { color: var(--add); font-weight: 600; } .down { color: var(--del); font-weight: 600; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip { padding: 6px 12px; border-radius: 8px; border: 1px solid var(--line); }
+  .chip b { font-size: 18px; margin-right: 4px; }
+  .revs { display: flex; flex-wrap: wrap; gap: 8px; }
+  .rev { border: 1px solid var(--line); border-radius: 8px; padding: 8px 12px; min-width: 180px; cursor: pointer; }
+  .rev.sel { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+  .rev .r { font-weight: 700; font-size: 16px; } .muted { color: var(--muted); }
+  ul.tree, ul.tree ul { list-style: none; margin: 0; padding-left: 20px; } ul.tree { padding-left: 0; }
+  ul.tree li { padding: 2px 0; position: relative; }
+  ul.tree ul li::before { content: ""; position: absolute; left: -13px; top: 0; height: 14px; width: 10px;
+                          border-left: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+  .asm { font-weight: 600; } .msg { padding: 10px; border-radius: 6px; background: var(--del-bg); color: var(--del); }
+  .empty { color: var(--muted); }
+</style>
+</head>
+<body>
+<header>
+  <h1>BOM 개정 비교</h1>
+  <div class="bar">
+    <label>제품 <select id="product"></select></label>
+    <label>이전 <select id="from"></select></label>
+    <label>이후 <select id="to"></select></label>
+    <span class="seg" id="unit"><button data-u="mm" class="on">mm</button><button data-u="m">m</button></span>
+    <button class="primary" id="go">비교</button>
+    <label>날짜로 과거 BOM <input type="date" id="asof"></label>
+  </div>
+</header>
+<main>
+  <section><h2>개정 이력 <span class="muted">(누르면 해당 개정 BOM 표시)</span></h2><div class="revs" id="revs"></div></section>
+  <div id="out" style="display:grid; gap:16px"></div>
+</main>
+<script>
+const $ = s => document.querySelector(s);
+const esc = v => String(v ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const TYPE = {ADDED: "추가", REMOVED: "삭제", QTY_CHANGED: "수량 변경", LENGTH_CHANGED: "길이 변경"};
+let unit = "mm", revisions = [];
+
+async function api(p) {
+  const r = await fetch(p); const b = await r.json();
+  if (!r.ok) throw new Error(`${b.error}: ${b.message}`);
+  return b;
+}
+const fail = e => $("#out").innerHTML = `<section><div class="msg">${esc(e.message)}</div></section>`;
+const product = () => $("#product").value;
+const U = () => unit;
+
+async function loadProducts() {
+  const ps = await api("/api/products");
+  $("#product").innerHTML = ps.map(p => `<option>${esc(p.product_no)}</option>`).join("");
+  if (ps.length) await loadRevisions();
+}
+async function loadRevisions() {
+  revisions = await api(`/api/products/${encodeURIComponent(product())}/revisions`);
+  const opts = revisions.map(r => `<option value="${esc(r.revision)}">${esc(r.revision)} (${esc(r.effective_date)})</option>`).join("");
+  $("#from").innerHTML = opts; $("#to").innerHTML = opts;
+  $("#from").selectedIndex = Math.max(0, revisions.length - 2); $("#to").selectedIndex = revisions.length - 1;
+  renderRevs(); compare();
+}
+function renderRevs(sel) {
+  $("#revs").innerHTML = revisions.map(r => `<div class="rev ${r.revision === sel ? "sel" : ""}" data-rev="${esc(r.revision)}">
+    <div class="r">개정 ${esc(r.revision)}</div><div class="muted">${esc(r.effective_date)} · 부품 ${r.counts.PART || 0} / 조립 ${r.counts.ASSEMBLY || 0}</div>
+    <div>${esc(r.note)}</div></div>`).join("");
+}
+const delta = (a, b) => { const d = Number(b) - Number(a); return d > 0 ? `<span class="up">+${+d.toFixed(6)}</span>` : d < 0 ? `<span class="down">${+d.toFixed(6)}</span>` : ""; };
+
+async function compare() {
+  const d = await api(`/api/products/${encodeURIComponent(product())}/diff?from=${$("#from").value}&to=${$("#to").value}&unit=${U()}`);
+  const s = d.summary;
+  const chip = (cls, label, n) => `<span class="chip"><b>${n}</b><span class="badge ${cls}">${label}</span></span>`;
+  $("#out").innerHTML = `
+  <section><h2>개정 ${esc(d.from.revision)} (${esc(d.from.effective_date)}) → ${esc(d.to.revision)} (${esc(d.to.effective_date)}) <span class="muted">${esc(d.to.note)}</span></h2>
+    <div class="chips">${chip("ADDED","추가",s.ADDED)}${chip("REMOVED","삭제",s.REMOVED)}${chip("QTY_CHANGED","수량 변경",s.QTY_CHANGED)}${chip("LENGTH_CHANGED","길이 변경",s.LENGTH_CHANGED)}${chip("SPEC","규격 변경",s.SPEC_CHANGED)}</div></section>
+  <section><h2>구성 변경</h2>${d.line_changes.length ? `<table><tr><th>구분</th><th>상위</th><th>품번</th><th>품명</th><th class="num">수량 (전→후)</th><th class="num">1개당 길이 ${U()} (전→후)</th></tr>
+    ${d.line_changes.map(c => `<tr><td><span class="badge ${c.type}">${TYPE[c.type]}</span></td><td>${esc(c.parent)}</td><td>${esc(c.child)}</td><td>${esc(c.name)}</td>
+      <td class="num">${c.qty_before ?? "-"} → ${c.qty_after ?? "-"} ${c.qty_before && c.qty_after ? delta(c.qty_before, c.qty_after) : ""}</td>
+      <td class="num">${c.length_before ?? (c.type === "LENGTH_CHANGED" ? "-" : "")}${c.type === "LENGTH_CHANGED" || c.length_after ? " → " + (c.length_after ?? "-") : ""}</td></tr>`).join("")}</table>` : `<p class="empty">구성 변경 없음</p>`}</section>
+  <section><h2>규격 변경</h2>${d.spec_changes.length ? `<table><tr><th>품번</th><th>품명</th><th>항목</th><th>이전</th><th>이후</th></tr>
+    ${d.spec_changes.map(c => `<tr><td>${esc(c.part_no)}</td><td>${esc(c.name)}</td><td><span class="badge SPEC">${esc(c.label)}</span></td>
+      <td>${esc(c.before ?? "-")}</td><td>${esc(c.after ?? "-")}</td></tr>`).join("")}</table>` : `<p class="empty">규격 변경 없음</p>`}</section>
+  <section><h2>전개 총수량 변화 <span class="muted">(하위 조립 수량까지 곱한 결과)</span></h2>${d.exploded_changes.length ? `<table><tr><th>품번</th><th>품명</th><th class="num">이전</th><th class="num">이후</th><th class="num">증감</th><th class="num">총 길이 ${U()} (전→후)</th></tr>
+    ${d.exploded_changes.map(c => `<tr><td>${esc(c.part_no)}</td><td>${esc(c.name)}</td><td class="num">${c.qty_before}</td><td class="num">${c.qty_after}</td><td class="num">${delta(c.qty_before, c.qty_after)}</td>
+      <td class="num">${c.length_before !== null ? `${c.length_before} → ${c.length_after}` : ""}</td></tr>`).join("")}</table>` : `<p class="empty">총수량 변화 없음</p>`}</section>`;
+}
+
+function treeHtml(nodes) {
+  return `<ul class="tree">${nodes.map(n => `<li><span class="${n.kind === "ASSEMBLY" ? "asm" : ""}">${esc(n.part_no)}</span> ${esc(n.name)}
+    <span class="muted">× ${n.qty}${n.length ? ` · ${n.length}${U()}/개` : ""}${n.material ? " · " + esc(n.material) : ""}${n.thickness_mm ? ` t${n.thickness_mm}` : ""} · 총 ${n.total_qty}</span>
+    ${n.children.length ? treeHtml(n.children) : ""}</li>`).join("")}</ul>`;
+}
+async function showBom(q) {
+  const b = await api(`/api/products/${encodeURIComponent(product())}/bom?${q}&unit=${U()}`);
+  renderRevs(b.revision);
+  $("#out").innerHTML = `<section><h2>개정 ${esc(b.revision)} BOM <span class="muted">${esc(b.effective_date)} 유효 · ${esc(b.note)}</span></h2>
+    <ul class="tree"><li><span class="asm">${esc(b.root)}</span> ${esc(b.root_name)}${treeHtml(b.tree)}</li></ul></section>
+    <section><h2>전개 총수량</h2><table><tr><th>품번</th><th>품명</th><th>구분</th><th>재질</th><th class="num">두께 mm</th><th class="num">총수량</th><th class="num">총 길이 ${U()}</th></tr>
+    ${b.exploded.map(e => `<tr><td>${esc(e.part_no)}</td><td>${esc(e.name)}</td><td>${e.kind === "ASSEMBLY" ? "조립" : "부품"}</td><td>${esc(e.material ?? "")}</td>
+      <td class="num">${e.thickness_mm ?? ""}</td><td class="num">${e.total_qty}</td><td class="num">${e.total_length ?? ""}</td></tr>`).join("")}</table></section>`;
+}
+
+$("#product").addEventListener("change", () => loadRevisions().catch(fail));
+$("#go").addEventListener("click", () => { renderRevs(); compare().catch(fail); });
+$("#unit").addEventListener("click", e => {
+  const u = e.target.dataset.u; if (!u) return;
+  unit = u; document.querySelectorAll("#unit button").forEach(b => b.classList.toggle("on", b.dataset.u === u));
+  const sel = document.querySelector(".rev.sel");
+  (sel ? showBom(`rev=${encodeURIComponent(sel.dataset.rev)}`) : compare()).catch(fail);
+});
+$("#revs").addEventListener("click", e => { const r = e.target.closest(".rev"); if (r) showBom(`rev=${encodeURIComponent(r.dataset.rev)}`).catch(fail); });
+$("#asof").addEventListener("change", e => e.target.value && showBom(`as_of=${e.target.value}`).catch(fail));
+loadProducts().catch(fail);
+</script>
+</body>
+</html>

@@ -1,0 +1,69 @@
+{
+  "_설명": "수작업으로 계산한 정답. 코드 출력이 아니라 아래 계산식으로 직접 구했다. 길이 단위는 mm.",
+  "_계산": {
+    "SA-NOZZLE": "A~C: 쉘 1 × 노즐 3 = 3 / D: 1 × 4 = 4",
+    "BOLT-M16": "A~C: 노즐 3 × 4 = 12 / D: 4 × 4 = 16",
+    "WSH-M16": "C: 노즐 3 × 4 = 12 / D: 4 × 4 = 16",
+    "PIPE-25A": "A~C: 4본 × 1250mm = 5000mm (5m) / D: 6 × 1250 = 7500mm (7.5m)",
+    "LEG": "4개 × 0.8m(=800mm) = 3200mm (3.2m)"
+  },
+  "exploded": {
+    "A": {"SA-SHELL": "1", "SA-JACKET": "1", "SA-NOZZLE": "3", "PL-SHELL": "2", "HD-TOP": "1", "HD-BTM": "1",
+          "NZ-50A": "3", "FL-50A": "3", "GSK-50A": "3", "BOLT-M16": "12", "PL-JKT": "2",
+          "PIPE-25A": "4", "ELB-25A": "6", "LEG": "4", "LUG": "4"},
+    "B": {"SA-SHELL": "1", "SA-JACKET": "1", "SA-NOZZLE": "3", "PL-SHELL": "2", "HD-TOP": "1", "HD-BTM": "1",
+          "NZ-50A": "3", "FL-50A": "3", "GSK-50A": "3", "BOLT-M16": "12", "PL-JKT": "2",
+          "PIPE-25A": "4", "ELB-25A": "6", "LEG": "4", "LUG": "4"},
+    "C": {"SA-SHELL": "1", "SA-JACKET": "1", "SA-NOZZLE": "3", "PL-SHELL": "2", "HD-TOP": "1", "HD-BTM": "1",
+          "NZ-50A": "3", "FL-50A": "3", "GSK-50A": "3", "BOLT-M16": "12", "PL-JKT": "2",
+          "PIPE-25A": "4", "ELB-25A": "6", "LEG": "4", "LUG": "4", "SG-01": "1", "WSH-M16": "12"},
+    "D": {"SA-SHELL": "1", "SA-JACKET": "1", "SA-NOZZLE": "4", "PL-SHELL": "2", "HD-TOP": "1", "HD-BTM": "1",
+          "NZ-50A": "4", "FL-50A": "4", "GSK-50A": "4", "BOLT-M16": "16", "PL-JKT": "2",
+          "PIPE-25A": "6", "ELB-25A": "6", "LEG": "4", "SG-01": "1", "WSH-M16": "16"}
+  },
+  "total_length_mm": {
+    "A": {"PIPE-25A": "5000", "LEG": "3200"},
+    "B": {"PIPE-25A": "5000", "LEG": "3200"},
+    "C": {"PIPE-25A": "5000", "LEG": "3200"},
+    "D": {"PIPE-25A": "7500", "LEG": "3200"}
+  },
+  "diffs": {
+    "A->B": {
+      "line_changes": [],
+      "spec_changes": [["PL-SHELL", "thickness", "6", "8"], ["PL-JKT", "material", "SS400", "SUS304"]],
+      "exploded_changes": {}
+    },
+    "B->C": {
+      "line_changes": [["ADDED", "SA-NOZZLE", "WSH-M16"], ["ADDED", "SA-SHELL", "SG-01"]],
+      "spec_changes": [],
+      "exploded_changes": {"SG-01": ["0", "1"], "WSH-M16": ["0", "12"]}
+    },
+    "C->D": {
+      "line_changes": [["QTY_CHANGED", "SA-JACKET", "PIPE-25A"], ["QTY_CHANGED", "SA-SHELL", "SA-NOZZLE"],
+                       ["REMOVED", "RX-500", "LUG"]],
+      "spec_changes": [],
+      "exploded_changes": {"SA-NOZZLE": ["3", "4"], "NZ-50A": ["3", "4"], "FL-50A": ["3", "4"],
+                           "GSK-50A": ["3", "4"], "BOLT-M16": ["12", "16"], "WSH-M16": ["12", "16"],
+                           "PIPE-25A": ["4", "6"], "LUG": ["4", "0"]}
+    }
+  },
+  "unit_checks": [
+    {"input": {"value": 1250, "unit": "mm"}, "mm": "1250", "m": "1.25"},
+    {"input": {"value": 1.25, "unit": "m"}, "mm": "1250", "m": "1.25"},
+    {"input": {"value": 125, "unit": "cm"}, "mm": "1250", "m": "1.25"},
+    {"input": {"value": 0.8, "unit": "m"}, "mm": "800", "m": "0.8"},
+    {"input": {"value": 4.5, "unit": "mm"}, "mm": "4.5", "m": "0.0045"},
+    {"input": {"value": 1, "unit": "cm"}, "mm": "10", "m": "0.01"},
+    {"input": {"value": "0.1", "unit": "m"}, "mm": "100", "m": "0.1"}
+  ],
+  "invalid": {
+    "cycle_nested": "CYCLE",
+    "cycle_self": "CYCLE",
+    "unit_inch": "UNIT_UNSUPPORTED",
+    "unknown_part": "UNKNOWN_PART",
+    "qty_negative": "QTY_NOT_POSITIVE",
+    "part_has_children": "PART_HAS_CHILDREN",
+    "orphan_item": "ORPHAN_ITEM"
+  },
+  "as_of": {"2026-02-28": null, "2026-03-01": "A", "2026-04-15": "B", "2026-05-31": "C", "2026-12-31": "D"}
+}

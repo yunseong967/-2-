@@ -10,7 +10,9 @@ cd kdgt-assessment
 python -m pip install -r requirements-dev.txt   # pytest (테스트용)
 python -m pytest                                # 전체 테스트
 python -m task01_data_integration.cli verify    # 과제 01 완료 기준 검증
+python -m task03_bom_revision.cli verify        # 과제 03 완료 기준 검증
 python -m task06_lot_traceability.cli verify    # 과제 06 완료 기준 검증
+python -m task03_bom_revision.cli serve         # 과제 03 개정 비교 화면 http://127.0.0.1:8003
 python -m task06_lot_traceability.cli serve     # 과제 06 추적 화면 http://127.0.0.1:8006
 ```
 
@@ -22,7 +24,7 @@ Python 3.11 이상. 런타임은 표준 라이브러리만 사용합니다(SQLit
 |---|---|---|---|
 | 01 | 제조 데이터 통합과 정합성 검사 | 구현·검증 완료 | [task01_data_integration](task01_data_integration/README.md) |
 | 02 | CAD 도면 객체 추출 | 예정 | |
-| 03 | BOM 생성과 개정 관리 | 예정 | |
+| 03 | BOM 생성과 개정 관리 | 구현·검증 완료 | [task03_bom_revision](task03_bom_revision/README.md) |
 | 04 | 근거를 보여주는 자동 견적 | 예정 | |
 | 05 | 견적 예측 모델의 타당성 | 예정 | |
 | 06 | LOT 양방향 추적과 출하 차단 | 구현·검증 완료 | [task06_lot_traceability](task06_lot_traceability/README.md) |
@@ -41,9 +43,10 @@ Python 3.11 이상. 런타임은 표준 라이브러리만 사용합니다(SQLit
 
 ```
 kdgt-assessment/
-├── common/            DB 연결, CSV 읽기(UTF-8/CP949), 행 해시, 엄격한 날짜 파싱
+├── common/            DB 연결, CSV 읽기(UTF-8/CP949), 행 해시, 엄격한 날짜 파싱, JSON HTTP 서버
 ├── docs/              AI 사용 기록 템플릿
 ├── task01_data_integration/   과제 01
+├── task03_bom_revision/       과제 03
 ├── task06_lot_traceability/   과제 06
 └── pytest.ini
 ```
