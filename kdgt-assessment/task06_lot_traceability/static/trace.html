@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LOT 추적</title>
+<style>
+  :root {
+    --bg: #f6f7f9; --panel: #fff; --text: #1d2330; --muted: #667085; --line: #e3e6eb;
+    --accent: #2457c5; --pass: #18794e; --pass-bg: #e6f4ec; --fail: #b42318; --fail-bg: #fdecea;
+    --hold: #a15c07; --hold-bg: #fef3e2; --pend: #475467; --pend-bg: #eef0f3;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #12151b; --panel: #1b2029; --text: #e6e9ef; --muted: #98a2b3; --line: #2c3340;
+      --accent: #7aa2ff; --pass: #5fd49a; --pass-bg: #163326; --fail: #ff8a80; --fail-bg: #3a1a18;
+      --hold: #f5b54a; --hold-bg: #3a2a10; --pend: #c0c6d0; --pend-bg: #262c36;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text);
+         font: 14px/1.5 -apple-system, "Segoe UI", "Malgun Gothic", "Apple SD Gothic Neo", sans-serif; }
+  header { padding: 16px; border-bottom: 1px solid var(--line); background: var(--panel); }
+  header h1 { margin: 0 0 10px; font-size: 18px; }
+  .bar { display: flex; flex-wrap: wrap; gap: 8px; }
+  input { flex: 1 1 160px; min-width: 0; padding: 8px 10px; border: 1px solid var(--line); border-radius: 6px;
+          background: var(--bg); color: var(--text); font: inherit; }
+  button { padding: 8px 12px; border: 1px solid var(--line); border-radius: 6px; background: var(--panel);
+           color: var(--text); font: inherit; cursor: pointer; }
+  button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  main { padding: 16px; max-width: 1200px; margin: 0 auto; display: grid; gap: 16px; }
+  section { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 14px; overflow-x: auto; }
+  h2 { margin: 0 0 10px; font-size: 15px; }
+  table { border-collapse: collapse; width: 100%; font-size: 13px; }
+  th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+  th { color: var(--muted); font-weight: 600; }
+  td.num { text-align: right; font-variant-numeric: tabular-nums; }
+  a.lot { color: var(--accent); cursor: pointer; text-decoration: none; }
+  a.lot:hover { text-decoration: underline; }
+  .badge { display: inline-block; padding: 1px 8px; border-radius: 10px; font-size: 12px; font-weight: 600; }
+  .PASS { color: var(--pass); background: var(--pass-bg); } .FAIL { color: var(--fail); background: var(--fail-bg); }
+  .HOLD { color: var(--hold); background: var(--hold-bg); } .PENDING { color: var(--pend); background: var(--pend-bg); }
+  ul.tree, ul.tree ul { list-style: none; margin: 0; padding-left: 18px; }
+  ul.tree { padding-left: 0; }
+  ul.tree li { position: relative; padding: 3px 0; }
+  ul.tree ul li::before { content: ""; position: absolute; left: -12px; top: 0; height: 15px; width: 10px;
+                          border-left: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+  .edge { color: var(--muted); font-size: 12px; margin-right: 4px; }
+  .muted { color: var(--muted); }
+  .msg { padding: 10px; border-radius: 6px; background: var(--fail-bg); color: var(--fail); }
+  .ok { color: var(--pass); font-weight: 600; } .ng { color: var(--fail); font-weight: 600; }
+</style>
+</head>
+<body>
+<header>
+  <h1>LOT 양방향 추적</h1>
+  <div class="bar">
+    <input id="q" placeholder="LOT 번호 (예: M-A, P-001)" autocomplete="off">
+    <button class="primary" data-act="forward">정방향 (자재 → 출하)</button>
+    <button data-act="backward">역방향 (제품 → 원자재)</button>
+    <button data-act="lots">LOT 목록</button>
+    <button data-act="shipments">출하 목록</button>
+    <button data-act="reconcile">수불 대조</button>
+  </div>
+</header>
+<main id="out"></main>
+<script>
+const $ = s => document.querySelector(s);
+const out = $("#out");
+const esc = v => String(v ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const badge = (s, label) => `<span class="badge ${esc(s)}">${esc(label || s)}</span>`;
+const lotLink = id => `<a class="lot" data-lot="${esc(id)}">${esc(id)}</a>`;
+const EDGE = {SPLIT: "분할", MERGE: "병합", CONSUME: "투입"};
+
+async function api(path) {
+  const r = await fetch(path);
+  const body = await r.json();
+  if (!r.ok) throw new Error(`${body.error}: ${body.message}`);
+  return body;
+}
+function show(html) { out.innerHTML = html; }
+function fail(e) { show(`<section><div class="msg">${esc(e.message)}</div></section>`); }
+
+function lotTable(lots, extra) {
+  return `<table><tr><th>LOT</th><th>종류</th><th>품목</th><th>상태</th><th class="num">현재고</th><th>단위</th><th>생성</th><th>사유</th>${extra ? "<th>최근 검사</th>" : ""}</tr>` +
+    lots.map(l => `<tr><td>${lotLink(l.lot_id)}</td><td>${l.kind === "PRODUCT" ? "제품" : "자재"}</td><td>${esc(l.item)}</td>
+      <td>${badge(l.status, l.status_label)}</td><td class="num">${l.qty}</td><td>${esc(l.unit)}</td><td>${esc(l.origin)}</td>
+      <td class="muted">${esc(l.status_reason)}</td>${extra ? `<td>${extra(l)}</td>` : ""}</tr>`).join("") + `</table>`;
+}
+
+function tree(rootId, edges, lotsById, direction) {
+  const next = {};
+  for (const e of edges) {
+    const [a, b] = direction === "forward" ? [e.from, e.to] : [e.to, e.from];
+    (next[a] ||= []).push({id: b, type: e.type, qty: e.qty});
+  }
+  const node = (id, via, seen) => {
+    const l = lotsById[id] || {};
+    const label = `${via ? `<span class="edge">${EDGE[via.type]} ${via.qty}</span>` : ""}${lotLink(id)} ${badge(l.status, l.status_label)} <span class="muted">${esc(l.item)} · ${l.qty} ${esc(l.unit)}</span>`;
+    if (seen.has(id)) return `<li>${label} <span class="muted">(위에 표시)</span></li>`;
+    seen.add(id);
+    const kids = (next[id] || []).map(k => node(k.id, k, seen)).join("");
+    return `<li>${label}${kids ? `<ul>${kids}</ul>` : ""}</li>`;
+  };
+  return `<ul class="tree">${node(rootId, null, new Set())}</ul>`;
+}
+
+function evidenceList(ev) {
+  if (!ev || !ev.length) return `<span class="muted">없음</span>`;
+  return ev.map(e => `${lotLink(e.lot_id)} #${e.seq} ${badge(e.result)} <span class="muted">${esc(e.inspector)}${e.note ? " · " + esc(e.note) : ""}</span>`).join("<br>");
+}
+
+function shipmentTable(list) {
+  if (!list.length) return `<p class="muted">출하 없음</p>`;
+  return `<table><tr><th>출하#</th><th>요청번호</th><th>LOT</th><th class="num">수량</th><th>고객</th><th>출하시각(UTC)</th><th>출하 시점 검사 근거</th><th></th></tr>` +
+    list.map(s => `<tr><td>${s.shipment_id}</td><td>${esc(s.request_id)}</td><td>${lotLink(s.lot_id)}</td><td class="num">${s.qty}</td>
+      <td>${esc(s.customer)}</td><td class="muted">${esc(s.shipped_at.replace("T", " ").slice(0, 19))}</td>
+      <td>${evidenceList(s.evidence)}</td><td><a class="lot" data-ship="${s.shipment_id}">원자재 역추적</a></td></tr>`).join("") + `</table>`;
+}
+
+async function forward(id) {
+  const t = await api(`/api/trace/forward/${encodeURIComponent(id)}`);
+  const byId = Object.fromEntries(t.lots.map(l => [l.lot_id, l]));
+  show(`<section><h2>정방향 추적: ${esc(id)} 에서 파생된 LOT</h2>${tree(id, t.edges, byId, "forward")}</section>
+    <section><h2>영향받는 출하 ${t.shipments.length}건</h2>${shipmentTable(t.shipments)}</section>
+    <section><h2>관련 LOT ${t.lots.length}개</h2>${lotTable(t.lots)}</section>`);
+}
+
+async function backward(id, shipment) {
+  const t = shipment ? await api(`/api/shipments/${shipment}/trace`) : await api(`/api/trace/backward/${encodeURIComponent(id)}`);
+  const byId = Object.fromEntries(t.lots.map(l => [l.lot_id, l]));
+  const head = t.shipment ? `<section><h2>출하 #${t.shipment.shipment_id} (${esc(t.shipment.request_id)})</h2>${shipmentTable([t.shipment])}</section>` : "";
+  show(`${head}<section><h2>역방향 추적: ${esc(t.root)} → 원자재 ${t.raw_materials.map(lotLink).join(", ")}</h2>${tree(t.root, t.edges, byId, "backward")}</section>
+    <section><h2>현재 검사 근거</h2>${evidenceList(t.evidence)}</section>
+    <section><h2>상위 LOT ${t.lots.length}개</h2>${lotTable(t.lots, l => l.latest_inspection
+      ? `#${l.latest_inspection.seq} ${badge(l.latest_inspection.result)} <span class="muted">${esc(l.latest_inspection.inspector)}</span>` : `<span class="muted">-</span>`)}</section>`);
+}
+
+async function lots() { show(`<section><h2>LOT 목록</h2>${lotTable(await api("/api/lots"))}</section>`); }
+async function shipments() { show(`<section><h2>출하 목록</h2>${shipmentTable(await api("/api/shipments"))}</section>`); }
+async function reconcile() {
+  const r = await api("/api/reconcile");
+  const cols = ["RECEIPT","SPLIT_IN","SPLIT_OUT","MERGE_IN","MERGE_OUT","PRODUCE","CONSUME","SHIP"];
+  const heads = ["입고","분할입","분할출","병합입","병합출","생산","투입","출하"];
+  show(`<section><h2>재고 수불 대조 — ${r.ok ? '<span class="ok">전체 일치</span>' : '<span class="ng">불일치 있음</span>'} · 음수 재고 LOT ${r.negative_lots}개</h2>
+    <table><tr><th>LOT</th><th>품목</th>${heads.map(h => `<th class="num">${h}</th>`).join("")}<th class="num">수불합계</th><th class="num">현재고</th><th class="num">차이</th><th></th></tr>
+    ${r.lots.map(l => `<tr><td>${lotLink(l.lot_id)}</td><td>${esc(l.item)}</td>${cols.map(c => `<td class="num">${l[c] || ""}</td>`).join("")}
+      <td class="num">${l.ledger_balance}</td><td class="num">${l.on_hand}</td><td class="num">${l.diff}</td><td>${l.ok ? '<span class="ok">OK</span>' : '<span class="ng">NG</span>'}</td></tr>`).join("")}</table></section>
+    <section><h2>품목별 보존식</h2><table><tr><th>품목</th><th>단위</th><th class="num">입고+생산</th><th class="num">투입+출하</th><th class="num">분할·병합 순증감</th><th class="num">현재고 합계</th><th></th></tr>
+    ${r.items.map(i => `<tr><td>${esc(i.item)}</td><td>${esc(i.unit)}</td><td class="num">${i.inflow}</td><td class="num">${i.outflow}</td><td class="num">${i.split_merge_net}</td><td class="num">${i.on_hand}</td><td>${i.ok ? '<span class="ok">OK</span>' : '<span class="ng">NG</span>'}</td></tr>`).join("")}</table></section>`);
+}
+
+const ACT = {
+  forward: () => forward($("#q").value.trim()), backward: () => backward($("#q").value.trim()),
+  lots, shipments, reconcile,
+};
+document.querySelectorAll("[data-act]").forEach(b => b.addEventListener("click", () => {
+  const a = b.dataset.act;
+  if ((a === "forward" || a === "backward") && !$("#q").value.trim()) return fail(new Error("LOT 번호를 입력하세요"));
+  ACT[a]().catch(fail);
+}));
+$("#q").addEventListener("keydown", e => { if (e.key === "Enter") ACT.forward().catch(fail); });
+out.addEventListener("click", e => {
+  const a = e.target.closest("a.lot");
+  if (!a) return;
+  if (a.dataset.ship) return backward(null, a.dataset.ship).catch(fail);
+  $("#q").value = a.dataset.lot;
+  (a.closest("section")?.querySelector("h2")?.textContent.startsWith("역방향") ? backward(a.dataset.lot) : forward(a.dataset.lot)).catch(fail);
+});
+lots().catch(fail);
+</script>
+</body>
+</html>

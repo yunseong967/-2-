@@ -1,0 +1,14 @@
+{
+  "concurrency_a": {
+    "outcome": {
+      "SHIPPED": 10,
+      "INSUFFICIENT_QTY": 10
+    },
+    "left": 0
+  },
+  "concurrency_b": {
+    "created": 1,
+    "replayed": 9,
+    "left": 9
+  }
+}
