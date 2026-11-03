@@ -1,0 +1,65 @@
+{
+  "model": "GBM 기준선 보정",
+  "target": "log(실제원가 / 기준선)",
+  "algorithm": "sklearn HistGradientBoostingRegressor",
+  "params": {
+    "max_iter": 300,
+    "learning_rate": 0.05,
+    "max_leaf_nodes": 15,
+    "min_samples_leaf": 8,
+    "l2_regularization": 1.0,
+    "early_stopping": false,
+    "random_state": 0
+  },
+  "features": [
+    "volume_l",
+    "shell_t_mm",
+    "plate_weight_kg",
+    "nozzle_count",
+    "jacket",
+    "weld_m",
+    "qty",
+    "rush",
+    "sus304_price",
+    "labor_rate",
+    "sus316l",
+    "type_REACTOR",
+    "type_AGITATOR",
+    "type_DRYER",
+    "type_PSG",
+    "log_baseline"
+  ],
+  "train_rows": 188,
+  "test_rows": 39,
+  "data_sha256": "ac5ab6c472cc4b3c61fcaf1c1b9cc13d4939af3db37e445042291f609fcf142b",
+  "splits": {
+    "train": [
+      "2024-01-01",
+      "2025-10-01"
+    ],
+    "val": [
+      "2025-11-01",
+      "2026-04-01"
+    ],
+    "test": [
+      "2026-05-01",
+      "2027-01-01"
+    ]
+  },
+  "zero_rule": "actual_cost <= 0 (취소) 제외",
+  "test_metrics": {
+    "n": 39,
+    "MAE": 1423860.1677068141,
+    "MAPE": 11.525576352681178,
+    "MdAPE": 8.132841334460467,
+    "within5": 25.64102564102564,
+    "within10": 58.97435897435898,
+    "bias_pct": -1.2592254746976939
+  },
+  "versions": {
+    "python": "3.13.18",
+    "numpy": "2.5.3",
+    "pandas": "3.0.5",
+    "scikit-learn": "1.9.1"
+  }
+}
