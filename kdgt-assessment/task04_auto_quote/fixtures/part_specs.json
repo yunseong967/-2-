@@ -1,0 +1,113 @@
+{
+  "_설명": "부품별 원가 기준정보. 치수는 도면 기준(과제 02 추출 대상). 재질·두께는 BOM 개정에서 가져온다.",
+  "parts": {
+    "PL-SHELL": {
+      "shape": "PLATE",
+      "length_mm": 1260,
+      "width_mm": 1000
+    },
+    "HD-TOP": {
+      "shape": "PLATE",
+      "length_mm": 960,
+      "width_mm": 960
+    },
+    "HD-BTM": {
+      "shape": "PLATE",
+      "length_mm": 960,
+      "width_mm": 960
+    },
+    "PL-JKT": {
+      "shape": "PLATE",
+      "length_mm": 1300,
+      "width_mm": 800
+    },
+    "LUG": {
+      "shape": "PLATE",
+      "length_mm": 150,
+      "width_mm": 100
+    },
+    "PIPE-25A": {
+      "shape": "LENGTH",
+      "size": "25A"
+    },
+    "LEG": {
+      "shape": "LENGTH",
+      "size": "□50x50"
+    },
+    "NZ-50A": {
+      "shape": "PURCHASED"
+    },
+    "FL-50A": {
+      "shape": "PURCHASED"
+    },
+    "GSK-50A": {
+      "shape": "PURCHASED"
+    },
+    "BOLT-M16": {
+      "shape": "PURCHASED"
+    },
+    "WSH-M16": {
+      "shape": "PURCHASED"
+    },
+    "ELB-25A": {
+      "shape": "PURCHASED"
+    },
+    "SG-01": {
+      "shape": "PURCHASED"
+    }
+  },
+  "routing": {
+    "_설명": "품목 1개당 공정 시간(h). 조립품은 그 조립에 드는 시간.",
+    "PL-SHELL": {
+      "LASER": 0.4,
+      "ROLL": 1.5
+    },
+    "HD-TOP": {
+      "LASER": 0.3
+    },
+    "HD-BTM": {
+      "LASER": 0.3
+    },
+    "PL-JKT": {
+      "LASER": 0.4,
+      "ROLL": 1.0
+    },
+    "LUG": {
+      "LASER": 0.1
+    },
+    "LEG": {
+      "LASER": 0.1
+    },
+    "PIPE-25A": {
+      "BEND": 0.3
+    },
+    "SA-NOZZLE": {
+      "WELD": 0.8,
+      "ASSY": 0.3
+    },
+    "SA-SHELL": {
+      "WELD": 6.0,
+      "FINISH": 4.0
+    },
+    "SA-JACKET": {
+      "WELD": 4.0
+    },
+    "RX-500": {
+      "ASSY": 3.0,
+      "WELD": 1.0
+    }
+  },
+  "outsource": {
+    "_설명": "품목 1개당 외주 수량 (단위는 외주 단가표의 단위).",
+    "HD-TOP": {
+      "HEAD_FORMING": 1
+    },
+    "HD-BTM": {
+      "HEAD_FORMING": 1
+    },
+    "SA-SHELL": {
+      "ELECTROPOLISH": 3.2,
+      "RT": 2
+    }
+  }
+}

@@ -1,0 +1,82 @@
+[
+  {
+    "quote_no": "Q01",
+    "product_no": "RX-500",
+    "revision": "A",
+    "qty": 1,
+    "quote_date": "2026-03-10",
+    "customer": "한빛제약"
+  },
+  {
+    "quote_no": "Q02",
+    "product_no": "RX-500",
+    "revision": "A",
+    "qty": 2,
+    "quote_date": "2026-03-10",
+    "customer": "대성바이오"
+  },
+  {
+    "quote_no": "Q03",
+    "product_no": "RX-500",
+    "revision": "B",
+    "qty": 1,
+    "quote_date": "2026-04-10",
+    "customer": "한빛제약"
+  },
+  {
+    "quote_no": "Q04",
+    "product_no": "RX-500",
+    "revision": "C",
+    "qty": 1,
+    "quote_date": "2026-05-10",
+    "customer": "청솔식품"
+  },
+  {
+    "quote_no": "Q05",
+    "product_no": "RX-500",
+    "revision": "C",
+    "qty": 1,
+    "quote_date": "2026-06-10",
+    "customer": "청솔식품"
+  },
+  {
+    "quote_no": "Q06",
+    "product_no": "RX-500",
+    "revision": "D",
+    "qty": 1,
+    "quote_date": "2026-06-10",
+    "customer": "미래화학"
+  },
+  {
+    "quote_no": "Q07",
+    "product_no": "RX-500",
+    "revision": "D",
+    "qty": 3,
+    "quote_date": "2026-06-10",
+    "customer": "서해케미칼"
+  },
+  {
+    "quote_no": "Q08",
+    "product_no": "RX-500",
+    "revision": "B",
+    "qty": 5,
+    "quote_date": "2026-05-20",
+    "customer": "대성바이오"
+  },
+  {
+    "quote_no": "Q09",
+    "product_no": "RX-500",
+    "revision": "D",
+    "qty": 2,
+    "quote_date": "2026-07-01",
+    "customer": "한빛제약"
+  },
+  {
+    "quote_no": "Q10",
+    "product_no": "RX-500",
+    "revision": "A",
+    "qty": 1,
+    "quote_date": "2026-06-10",
+    "customer": "한빛제약"
+  }
+]

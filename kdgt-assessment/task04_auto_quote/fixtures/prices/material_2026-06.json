@@ -1,0 +1,23 @@
+{
+  "table": "MATERIAL",
+  "label": "2026-06",
+  "effective_from": "2026-06-01",
+  "source": "강판 kg 단가 2026년 6월 (SUS304 인상) — 합성 단가 (실제 거래가 아님)",
+  "items": [
+    {
+      "key": "SUS304",
+      "unit": "KG",
+      "price": 5200
+    },
+    {
+      "key": "SUS316L",
+      "unit": "KG",
+      "price": 6500
+    },
+    {
+      "key": "SS400",
+      "unit": "KG",
+      "price": 1250
+    }
+  ]
+}

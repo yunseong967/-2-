@@ -1,6 +1,7 @@
 """작은 JSON HTTP 서버 (표준 라이브러리). 과제 03 부터 공통으로 쓴다.
 
 - 라우트: (메서드, 정규식, 함수). 함수는 (ctx, Request) → (상태코드, 본문)
+  파일 응답은 (상태코드, bytes, {"Content-Type": ..., 기타 헤더})
 - 예외에 http_status 와 to_dict() 가 있으면 그대로 응답 (업무 오류)
 - 그 밖의 예외는 내부 정보 없이 500
 - 과제 06 에서 겪은 문제 반영: 접속 대기열(listen backlog) 기본값 5 → 128
@@ -49,11 +50,13 @@ def make_handler(routes: list[Route], open_ctx: Callable[[], AbstractContextMana
         def log_message(self, fmt, *args):
             pass
 
-        def _send(self, status: int, body, ctype="application/json; charset=utf-8"):
+        def _send(self, status: int, body, ctype="application/json; charset=utf-8", headers=None):
             data = body if isinstance(body, bytes) else json.dumps(body, ensure_ascii=False).encode()
             self.send_response(status)
             self.send_header("Content-Type", ctype)
             self.send_header("Content-Length", str(len(data)))
+            for k, v in (headers or {}).items():
+                self.send_header(k, v)
             self.end_headers()
             self.wfile.write(data)
 
@@ -80,8 +83,13 @@ def make_handler(routes: list[Route], open_ctx: Callable[[], AbstractContextMana
                           {k: v[-1] for k, v in parse_qs(parts.query).items()}, body)
             try:
                 with open_ctx() as ctx:
-                    status, out = fn(ctx, req)
-                self._send(status, out)
+                    result = fn(ctx, req)
+                if len(result) == 3:   # (상태, bytes, {헤더}) — 파일 다운로드
+                    status, out, headers = result
+                    ctype = headers.pop("Content-Type", "application/octet-stream")
+                    self._send(status, out, ctype, headers)
+                else:
+                    self._send(*result)
             except Exception as e:
                 if hasattr(e, "http_status") and hasattr(e, "to_dict"):
                     self._send(e.http_status, e.to_dict())

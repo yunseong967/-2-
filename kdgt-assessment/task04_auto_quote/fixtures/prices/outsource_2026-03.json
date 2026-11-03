@@ -1,0 +1,23 @@
+{
+  "table": "OUTSOURCE",
+  "label": "2026-03",
+  "effective_from": "2026-03-01",
+  "source": "외주 단가 2026년 3월 — 합성 단가 (실제 거래가 아님)",
+  "items": [
+    {
+      "key": "HEAD_FORMING",
+      "unit": "EA",
+      "price": 280000
+    },
+    {
+      "key": "ELECTROPOLISH",
+      "unit": "M2",
+      "price": 95000
+    },
+    {
+      "key": "RT",
+      "unit": "EA",
+      "price": 150000
+    }
+  ]
+}
