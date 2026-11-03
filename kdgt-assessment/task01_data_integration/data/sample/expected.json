@@ -1,0 +1,176 @@
+{
+  "seed": 20261102,
+  "normal_rows": {
+    "orders.csv": 10,
+    "materials.csv": 20,
+    "receipts.csv": 25,
+    "inspections.csv": 25,
+    "shipments.csv": 20
+  },
+  "error_rows": [
+    {
+      "file": "inspections.csv",
+      "source_row": 7,
+      "kind": "negative_qty",
+      "category": "음수수량",
+      "expected_code": "QTY_NEGATIVE",
+      "key": "I2026-9013"
+    },
+    {
+      "file": "inspections.csv",
+      "source_row": 8,
+      "kind": "unknown_lot",
+      "category": "미등록 LOT",
+      "expected_code": "UNKNOWN_LOT",
+      "key": "I2026-9008"
+    },
+    {
+      "file": "inspections.csv",
+      "source_row": 12,
+      "kind": "date_sequence",
+      "category": "날짜오류",
+      "expected_code": "DATE_SEQUENCE",
+      "key": "I2026-9019"
+    },
+    {
+      "file": "inspections.csv",
+      "source_row": 23,
+      "kind": "unknown_lot",
+      "category": "미등록 LOT",
+      "expected_code": "UNKNOWN_LOT",
+      "key": "I2026-9009"
+    },
+    {
+      "file": "inspections.csv",
+      "source_row": 31,
+      "kind": "duplicate",
+      "category": "중복",
+      "expected_code": "DUPLICATE_IN_FILE",
+      "key": "I2026-0025"
+    },
+    {
+      "file": "materials.csv",
+      "source_row": 12,
+      "kind": "duplicate",
+      "category": "중복",
+      "expected_code": "DUPLICATE_IN_FILE",
+      "key": "L2026-0007"
+    },
+    {
+      "file": "receipts.csv",
+      "source_row": 6,
+      "kind": "unknown_lot",
+      "category": "미등록 LOT",
+      "expected_code": "UNKNOWN_LOT",
+      "key": "R2026-9007"
+    },
+    {
+      "file": "receipts.csv",
+      "source_row": 8,
+      "kind": "negative_qty",
+      "category": "음수수량",
+      "expected_code": "QTY_NEGATIVE",
+      "key": "R2026-9011"
+    },
+    {
+      "file": "receipts.csv",
+      "source_row": 15,
+      "kind": "negative_qty",
+      "category": "음수수량",
+      "expected_code": "QTY_NEGATIVE",
+      "key": "R2026-9012"
+    },
+    {
+      "file": "receipts.csv",
+      "source_row": 17,
+      "kind": "duplicate",
+      "category": "중복",
+      "expected_code": "DUPLICATE_IN_FILE",
+      "key": "R2026-0006"
+    },
+    {
+      "file": "receipts.csv",
+      "source_row": 20,
+      "kind": "unknown_lot",
+      "category": "미등록 LOT",
+      "expected_code": "UNKNOWN_LOT",
+      "key": "R2026-9006"
+    },
+    {
+      "file": "receipts.csv",
+      "source_row": 25,
+      "kind": "duplicate",
+      "category": "중복",
+      "expected_code": "DUPLICATE_IN_FILE",
+      "key": "R2026-0012"
+    },
+    {
+      "file": "receipts.csv",
+      "source_row": 29,
+      "kind": "bad_date",
+      "category": "날짜오류",
+      "expected_code": "DATE_INVALID",
+      "key": "R2026-9016"
+    },
+    {
+      "file": "receipts.csv",
+      "source_row": 31,
+      "kind": "bad_date",
+      "category": "날짜오류",
+      "expected_code": "DATE_INVALID",
+      "key": "R2026-9017"
+    },
+    {
+      "file": "shipments.csv",
+      "source_row": 4,
+      "kind": "unknown_lot",
+      "category": "미등록 LOT",
+      "expected_code": "UNKNOWN_LOT",
+      "key": "S2026-9010"
+    },
+    {
+      "file": "shipments.csv",
+      "source_row": 7,
+      "kind": "duplicate",
+      "category": "중복",
+      "expected_code": "DUPLICATE_IN_FILE",
+      "key": "S2026-0002"
+    },
+    {
+      "file": "shipments.csv",
+      "source_row": 9,
+      "kind": "negative_qty",
+      "category": "음수수량",
+      "expected_code": "QTY_NEGATIVE",
+      "key": "S2026-9015"
+    },
+    {
+      "file": "shipments.csv",
+      "source_row": 11,
+      "kind": "date_sequence",
+      "category": "날짜오류",
+      "expected_code": "DATE_SEQUENCE",
+      "key": "S2026-9020"
+    },
+    {
+      "file": "shipments.csv",
+      "source_row": 16,
+      "kind": "negative_qty",
+      "category": "음수수량",
+      "expected_code": "QTY_NEGATIVE",
+      "key": "S2026-9014"
+    },
+    {
+      "file": "shipments.csv",
+      "source_row": 25,
+      "kind": "bad_date",
+      "category": "날짜오류",
+      "expected_code": "DATE_INVALID",
+      "key": "S2026-9018"
+    }
+  ],
+  "totals": {
+    "normal": 100,
+    "error": 20
+  }
+}

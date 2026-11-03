@@ -1,0 +1,46 @@
+# KDGT 제조 AI 개발자 실습 평가
+
+경동글로벌텍 제조AI 플랫폼 구축 사업을 바탕으로 한 실습 과제 10개 제출물입니다.
+모든 데이터는 **합성 데이터**이며 실제 도면·원가는 쓰지 않습니다.
+
+## 빠른 실행
+
+```bash
+cd kdgt-assessment
+python -m pip install -r requirements-dev.txt   # pytest (테스트용)
+python -m pytest                                # 전체 테스트
+python -m task01_data_integration.cli verify    # 과제 01 완료 기준 검증
+```
+
+Python 3.11 이상. 런타임은 표준 라이브러리만 사용합니다(SQLite 내장).
+
+## 과제 현황
+
+| # | 과제 | 상태 | 폴더 |
+|---|---|---|---|
+| 01 | 제조 데이터 통합과 정합성 검사 | 구현·검증 완료 | [task01_data_integration](task01_data_integration/README.md) |
+| 02 | CAD 도면 객체 추출 | 예정 | |
+| 03 | BOM 생성과 개정 관리 | 예정 | |
+| 04 | 근거를 보여주는 자동 견적 | 예정 | |
+| 05 | 견적 예측 모델의 타당성 | 예정 | |
+| 06 | LOT 양방향 추적과 출하 차단 | 예정 | |
+| 07 | 입출하 질의응답 AI Agent | 예정 | |
+| 08 | 공정 이벤트 수집과 가시화 | 예정 | |
+| 09 | 납기 분석과 KPI 계산 | 예정 | |
+| 10 | 배포·권한·장애 복구 | 예정 | |
+
+## 공통 규칙
+
+- 과제 폴더 하나 = 독립 실행 단위. 공통 코드는 `common/`에서 재사용
+- 과제마다 포함할 것: `README.md`(실행 안내·설계 판단), 샘플 데이터 + 정답, `verify` 명령과 `reports/verification.md`, `tests/`, `AI_LOG.md`
+- 시연 영상(3분)은 저장소 밖에 보관하고 링크만 README에 기재
+
+## 폴더 구조
+
+```
+kdgt-assessment/
+├── common/            DB 연결, CSV 읽기(UTF-8/CP949), 행 해시, 엄격한 날짜 파싱
+├── docs/              AI 사용 기록 템플릿
+├── task01_data_integration/
+└── pytest.ini
+```
