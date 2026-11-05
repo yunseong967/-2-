@@ -1,0 +1,14 @@
+{
+ "drawing": "D07",
+ "format": "scan",
+ "part_no": "FL-PLATE",
+ "name": "플랜지 판",
+ "material": "SUS304",
+ "thickness_mm": 12,
+ "length_mm": 400,
+ "width_mm": 400,
+ "hole_count": 8,
+ "hole_dia_mm": 18,
+ "expect_review": [],
+ "note": "볼트 원형 배치"
+}

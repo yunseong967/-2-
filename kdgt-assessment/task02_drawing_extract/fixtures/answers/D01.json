@@ -1,0 +1,14 @@
+{
+ "drawing": "D01",
+ "format": "vector",
+ "part_no": "PL-SHELL",
+ "name": "쉘 판",
+ "material": "SUS304",
+ "thickness_mm": 6,
+ "length_mm": 1260,
+ "width_mm": 1000,
+ "hole_count": 4,
+ "hole_dia_mm": 12,
+ "expect_review": [],
+ "note": "기본"
+}

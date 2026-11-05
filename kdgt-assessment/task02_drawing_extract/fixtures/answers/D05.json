@@ -1,0 +1,16 @@
+{
+ "drawing": "D05",
+ "format": "vector",
+ "part_no": "BRK-01",
+ "name": "브래킷",
+ "material": "SUS316L",
+ "thickness_mm": null,
+ "length_mm": 300,
+ "width_mm": 200,
+ "hole_count": 4,
+ "hole_dia_mm": 14,
+ "expect_review": [
+  "thickness_mm"
+ ],
+ "note": "두께 칸 비어 있음"
+}

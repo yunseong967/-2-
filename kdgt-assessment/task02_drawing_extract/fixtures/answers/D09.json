@@ -1,0 +1,16 @@
+{
+ "drawing": "D09",
+ "format": "scan",
+ "part_no": "COVER-01",
+ "name": "커버 판",
+ "material": "SUS304",
+ "thickness_mm": 3,
+ "length_mm": 600,
+ "width_mm": null,
+ "hole_count": 6,
+ "hole_dia_mm": 8,
+ "expect_review": [
+  "width_mm"
+ ],
+ "note": "세로 치수 누락"
+}

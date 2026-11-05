@@ -1,0 +1,14 @@
+{
+ "drawing": "D04",
+ "format": "vector",
+ "part_no": "HD-BLANK",
+ "name": "경판 블랭크",
+ "material": "SUS304",
+ "thickness_mm": 8,
+ "length_mm": 960,
+ "width_mm": 960,
+ "hole_count": 1,
+ "hole_dia_mm": 50,
+ "expect_review": [],
+ "note": "단위 혼용: 가로 '0.96 m', 세로 '960'(기본 mm)"
+}

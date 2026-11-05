@@ -1,0 +1,14 @@
+{
+ "drawing": "D10",
+ "format": "scan",
+ "part_no": "GUSSET",
+ "name": "거셋",
+ "material": "SS400",
+ "thickness_mm": 9,
+ "length_mm": 250,
+ "width_mm": 150,
+ "hole_count": 0,
+ "hole_dia_mm": null,
+ "expect_review": [],
+ "note": "홀 없음 + 기울어짐·잡음 심함"
+}

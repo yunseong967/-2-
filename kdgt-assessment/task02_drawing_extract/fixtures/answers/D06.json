@@ -1,0 +1,14 @@
+{
+ "drawing": "D06",
+ "format": "scan",
+ "part_no": "PL-SHELL2",
+ "name": "쉘 판",
+ "material": "SUS316L",
+ "thickness_mm": 8,
+ "length_mm": 1500,
+ "width_mm": 1200,
+ "hole_count": 8,
+ "hole_dia_mm": 16,
+ "expect_review": [],
+ "note": "스캔 기본"
+}

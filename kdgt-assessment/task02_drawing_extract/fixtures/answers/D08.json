@@ -1,0 +1,14 @@
+{
+ "drawing": "D08",
+ "format": "scan",
+ "part_no": "BASE-01",
+ "name": "베이스 판",
+ "material": "SS400",
+ "thickness_mm": 16,
+ "length_mm": 1200,
+ "width_mm": 800,
+ "hole_count": 4,
+ "hole_dia_mm": 22,
+ "expect_review": [],
+ "note": "단위 혼용: '1.2 m', '80 cm'"
+}
