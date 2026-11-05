@@ -26,6 +26,8 @@ class Request:
     params: dict[str, str] = field(default_factory=dict)   # 경로 변수
     query: dict[str, str] = field(default_factory=dict)    # ?a=1 (마지막 값)
     body: Any = None
+    headers: dict[str, str] = field(default_factory=dict)  # 소문자 키 (인증 등)
+    client: str = ""
 
 
 Route = tuple[str, "re.Pattern[str]", Callable[[Any, Request], tuple[int, Any]]]
@@ -80,7 +82,8 @@ def make_handler(routes: list[Route], open_ctx: Callable[[], AbstractContextMana
                 except ValueError:
                     return self._send(400, {"error": "INVALID_JSON", "message": "JSON 형식 오류"})
             req = Request(method, path, match.groupdict(),
-                          {k: v[-1] for k, v in parse_qs(parts.query).items()}, body)
+                          {k: v[-1] for k, v in parse_qs(parts.query).items()}, body,
+                          {k.lower(): v for k, v in self.headers.items()}, self.client_address[0])
             try:
                 with open_ctx() as ctx:
                     result = fn(ctx, req)
@@ -92,7 +95,7 @@ def make_handler(routes: list[Route], open_ctx: Callable[[], AbstractContextMana
                     self._send(*result)
             except Exception as e:
                 if hasattr(e, "http_status") and hasattr(e, "to_dict"):
-                    self._send(e.http_status, e.to_dict())
+                    self._send(e.http_status, e.to_dict(), headers=getattr(e, "headers", None))
                 else:
                     self._send(500, {"error": "INTERNAL", "message": type(e).__name__})
 

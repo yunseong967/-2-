@@ -20,6 +20,7 @@ python -m task07_qa_agent.cli eval --backend mock   # 과제 07 하네스 점검
 python -m task08_process_events.cli verify      # 과제 08 장애 주입·복구 검증
 python -m task09_delivery_kpi.cli verify        # 과제 09 정답 대조·일정 규칙 검사
 python -m task09_delivery_kpi.cli serve         # 과제 09 일정 비교 화면 http://127.0.0.1:8009
+python -m task10_deploy.verify --runner docker   # 과제 10 컨테이너 배포·장애 복구 검증 (Docker 필요)
 ```
 
 Python 3.11 이상. 외부 라이브러리는 `openpyxl`(과제 04), `numpy`·`pandas`·`scikit-learn`(과제 05), `anthropic`(과제 07) 이며 나머지 과제는 표준 라이브러리(SQLite 내장)만 씁니다.
@@ -37,7 +38,7 @@ Python 3.11 이상. 외부 라이브러리는 `openpyxl`(과제 04), `numpy`·`p
 | 07 | 입출하 질의응답 AI Agent | 구현 완료 · **실제 Claude 평가는 API 키로 실행 필요** | [task07_qa_agent](task07_qa_agent/README.md) |
 | 08 | 공정 이벤트 수집과 가시화 | 구현·검증 완료 | [task08_process_events](task08_process_events/README.md) |
 | 09 | 납기 분석과 KPI 계산 | 구현·검증 완료 | [task09_delivery_kpi](task09_delivery_kpi/README.md) |
-| 10 | 배포·권한·장애 복구 | 예정 | |
+| 10 | 배포·권한·장애 복구 (과제 06 배포) | 구현·검증 완료 (Docker) | [task10_deploy](task10_deploy/README.md) |
 
 ## 공통 규칙
 
@@ -60,5 +61,6 @@ kdgt-assessment/
 ├── task07_qa_agent/           과제 07
 ├── task08_process_events/     과제 08
 ├── task09_delivery_kpi/       과제 09
+├── task10_deploy/             과제 10
 └── pytest.ini
 ```

@@ -1,0 +1,18 @@
+# 실행 (kdgt-assessment/task10_deploy/deploy 폴더에서):
+#   cp .env.example .env   # 비밀값은 .env 에만 (저장소에 올리지 않음)
+#   docker compose up -d --build
+#   docker compose exec app python -m task10_deploy.cli keys add --name 관리자 --role admin
+services:
+  app:
+    build:
+      context: ../..
+      dockerfile: task10_deploy/deploy/Dockerfile
+    image: kdgt-lot:task10
+    ports:
+      - "127.0.0.1:8010:8010"        # 외부 공개는 앞단 리버스 프록시(TLS)에서
+    env_file: .env
+    volumes:
+      - kdgt-data:/data
+    restart: unless-stopped
+volumes:
+  kdgt-data:

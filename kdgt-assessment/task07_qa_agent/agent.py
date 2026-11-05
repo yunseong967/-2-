@@ -98,6 +98,7 @@ class AgentResult:
     usage: dict = field(default_factory=lambda: {"input": 0, "output": 0, "cache_write": 0, "cache_read": 0})
     cost_usd: float = 0.0
     api_calls: int = 0
+    error: str | None = None                             # API 예외 클래스명 (시간초과 등) — 운영 계층에서 상태코드 결정용
     backend: str = ""
     model: str = ""
     served_by: list[str] = field(default_factory=list)
@@ -145,7 +146,8 @@ def cost_of(usage_by_model: list[tuple[str, dict]]) -> float:
 class ClaudeBackend:
     name = "claude"
 
-    def __init__(self, model: str = MODEL, effort: str = "medium", client=None):
+    def __init__(self, model: str = MODEL, effort: str = "medium", client=None,
+                 timeout: float | None = None, max_retries: int | None = None):
         import os
         import anthropic
         self.anthropic = anthropic
@@ -158,7 +160,8 @@ class ClaudeBackend:
             raise RuntimeError("Claude 자격 증명이 없습니다. ANTHROPIC_API_KEY 를 설정하거나 `ant auth login` 을 실행하세요.")
         # 환경의 ANTHROPIC_BASE_URL 을 그대로 따르지 않는다: 다른 도구가 설정해 둔 주소로 API 키가 새는 것을 막기 위해
         # 공식 주소를 쓰고, 프록시가 필요하면 KDGT_ANTHROPIC_BASE_URL 로 명시한다.
-        self.client = anthropic.Anthropic(base_url=os.environ.get("KDGT_ANTHROPIC_BASE_URL", "https://api.anthropic.com"))
+        opts = {k: v for k, v in (("timeout", timeout), ("max_retries", max_retries)) if v is not None}
+        self.client = anthropic.Anthropic(base_url=os.environ.get("KDGT_ANTHROPIC_BASE_URL", "https://api.anthropic.com"), **opts)
 
     def step(self, messages: list, question_id: str | None = None):
         resp = self.client.beta.messages.create(
@@ -225,6 +228,7 @@ class Agent:
             try:
                 out = self.backend.step(messages, question_id)
             except Exception as e:  # API 오류(인증·한도·네트워크)는 답변 보류로 기록
+                res.error = type(e).__name__
                 res.guards.append(f"G4 API 오류로 보류: {type(e).__name__}: {str(e)[:120]}")
                 break
             res.api_calls += 1
