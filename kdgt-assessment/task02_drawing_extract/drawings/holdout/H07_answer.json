@@ -1,0 +1,14 @@
+{
+ "drawing": "H07",
+ "format": "scan",
+ "part_no": "BRK-610",
+ "name": "칸막이 판",
+ "material": "SUS316L",
+ "thickness_mm": 12,
+ "length_mm": 1000,
+ "width_mm": 150,
+ "hole_count": 8,
+ "hole_dia_mm": 18,
+ "expect_review": [],
+ "note": "scan, 가로 '1000', 세로 '150', 두께 '1.2 cm', 홀 8개 grid4x2, 기울기 -0.95° 잡음 12"
+}

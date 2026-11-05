@@ -1,0 +1,59 @@
+{
+ "drawing": "D03",
+ "file": "D03_vector.pdf",
+ "source": "vector",
+ "processing_ms": 23.2,
+ "notes": [],
+ "fields": {
+  "part_no": {
+   "value": "LUG",
+   "status": "OK",
+   "evidence": "라벨 '품번' 오른쪽",
+   "reason": null
+  },
+  "name": {
+   "value": "러그",
+   "status": "OK",
+   "evidence": "라벨 '품명' 오른쪽",
+   "reason": null
+  },
+  "material": {
+   "value": "SS400",
+   "status": "OK",
+   "evidence": "라벨 '재질' 오른쪽",
+   "reason": null
+  },
+  "thickness_mm": {
+   "value": 10.0,
+   "status": "OK",
+   "evidence": "라벨 '두께' 오른쪽: 1 cm → 1.0 cm",
+   "reason": null
+  },
+  "length_mm": {
+   "value": 150.0,
+   "status": "OK",
+   "evidence": "가로(외형 아래): 150 → 150.0 mm",
+   "reason": null
+  },
+  "width_mm": {
+   "value": 100.0,
+   "status": "OK",
+   "evidence": "세로(외형 왼쪽): 100 → 100.0 mm",
+   "reason": null
+  },
+  "hole_count": {
+   "value": 2,
+   "status": "OK",
+   "evidence": "지시 '2-Ø18 THRU' = 도형 원 2개",
+   "reason": null
+  },
+  "hole_dia_mm": {
+   "value": 18.0,
+   "status": "OK",
+   "evidence": "지시 '2-Ø18 THRU'",
+   "reason": null
+  }
+ },
+ "review_fields": [],
+ "status": "OK"
+}

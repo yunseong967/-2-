@@ -1,0 +1,26 @@
+{
+ "_설명": "회사 품번 마스터(ERP) 예시 — 추출된 품번이 여기에 없으면 검토 필요. 과제 03 BOM 품번 + 이번 도면 품번",
+ "parts": [
+  "PL-SHELL",
+  "PL-JKT",
+  "LUG",
+  "HD-BLANK",
+  "BRK-01",
+  "PL-SHELL2",
+  "FL-PLATE",
+  "BASE-01",
+  "COVER-01",
+  "GUSSET",
+  "HD-TOP",
+  "HD-BTM",
+  "NZ-50A",
+  "FL-50A",
+  "GSK-50A",
+  "BOLT-M16",
+  "WSH-M16",
+  "PIPE-25A",
+  "ELB-25A",
+  "LEG",
+  "SG-01"
+ ]
+}

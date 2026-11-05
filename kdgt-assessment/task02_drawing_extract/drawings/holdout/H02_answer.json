@@ -1,0 +1,16 @@
+{
+ "drawing": "H02",
+ "format": "vector",
+ "part_no": "PL-597",
+ "name": "브래킷",
+ "material": "SUS304",
+ "thickness_mm": 6,
+ "length_mm": 200,
+ "width_mm": null,
+ "hole_count": 6,
+ "hole_dia_mm": 22,
+ "expect_review": [
+  "width_mm"
+ ],
+ "note": "vector, 가로 '200', 세로 'None', 두께 '6', 홀 6개 grid3x2"
+}

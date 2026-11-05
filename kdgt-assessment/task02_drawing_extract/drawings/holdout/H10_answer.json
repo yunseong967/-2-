@@ -1,0 +1,14 @@
+{
+ "drawing": "H10",
+ "format": "scan",
+ "part_no": "SP-843",
+ "name": "보강 판",
+ "material": "SUS304",
+ "thickness_mm": 10,
+ "length_mm": 1000,
+ "width_mm": 800,
+ "hole_count": 6,
+ "hole_dia_mm": 22,
+ "expect_review": [],
+ "note": "scan, 가로 '1 m', 세로 '80 cm', 두께 '10', 홀 6개 grid3x2, 기울기 -1.19° 잡음 8"
+}

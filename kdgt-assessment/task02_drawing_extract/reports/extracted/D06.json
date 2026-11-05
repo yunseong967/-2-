@@ -1,0 +1,62 @@
+{
+ "drawing": "D06",
+ "file": "D06_scan.pdf",
+ "source": "scan",
+ "processing_ms": 2976.9,
+ "notes": [
+  "기울기 보정 -0.39°",
+  "OCR 영역 17개"
+ ],
+ "fields": {
+  "part_no": {
+   "value": "PL-SHELL2",
+   "status": "OK",
+   "evidence": "라벨 '품번' 오른쪽",
+   "reason": null
+  },
+  "name": {
+   "value": null,
+   "status": "REVIEW",
+   "evidence": "라벨 '품번' 오른쪽",
+   "reason": "품명 판독 불가: 'PL-SHELL2'"
+  },
+  "material": {
+   "value": "SUS316L",
+   "status": "OK",
+   "evidence": "라벨 '재질' 오른쪽",
+   "reason": null
+  },
+  "thickness_mm": {
+   "value": 8.0,
+   "status": "OK",
+   "evidence": "라벨 '두께' 오른쪽: 8 → 8.0 mm",
+   "reason": null
+  },
+  "length_mm": {
+   "value": 1500.0,
+   "status": "OK",
+   "evidence": "가로(외형 아래): 1500 → 1500.0 mm",
+   "reason": null
+  },
+  "width_mm": {
+   "value": 1200.0,
+   "status": "OK",
+   "evidence": "세로(외형 왼쪽): 1200 → 1200.0 mm",
+   "reason": null
+  },
+  "hole_count": {
+   "value": 8,
+   "status": "OK",
+   "evidence": "지시 '8-©16 THRU' = 도형 원 8개",
+   "reason": null
+  },
+  "hole_dia_mm": {
+   "value": 16.0,
+   "status": "OK",
+   "evidence": "지시 '8-©16 THRU'",
+   "reason": null
+  }
+ },
+ "review_fields": [],
+ "status": "OK"
+}

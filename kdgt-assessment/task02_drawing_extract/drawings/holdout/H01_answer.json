@@ -1,0 +1,16 @@
+{
+ "drawing": "H01",
+ "format": "vector",
+ "part_no": "CV-729",
+ "name": "덮개 판",
+ "material": "SS400",
+ "thickness_mm": null,
+ "length_mm": 400,
+ "width_mm": 200,
+ "hole_count": 1,
+ "hole_dia_mm": 8,
+ "expect_review": [
+  "thickness_mm"
+ ],
+ "note": "vector, 가로 '40 cm', 세로 '200', 두께 '', 홀 1개 center"
+}

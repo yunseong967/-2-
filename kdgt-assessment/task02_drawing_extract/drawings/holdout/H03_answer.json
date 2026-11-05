@@ -1,0 +1,16 @@
+{
+ "drawing": "H03",
+ "format": "vector",
+ "part_no": "CV-546",
+ "name": "받침 판",
+ "material": "SS400",
+ "thickness_mm": 12,
+ "length_mm": 200,
+ "width_mm": 200,
+ "hole_count": 2,
+ "hole_dia_mm": null,
+ "expect_review": [
+  "hole_dia_mm"
+ ],
+ "note": "vector, 가로 '200', 세로 '200', 두께 '12', 홀 2개 row 지시 없음"
+}

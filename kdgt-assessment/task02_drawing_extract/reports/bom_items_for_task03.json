@@ -1,0 +1,100 @@
+{
+ "items": [
+  {
+   "part_no": "PL-SHELL",
+   "name": "쉘 판",
+   "kind": "PART",
+   "material": "SUS304",
+   "thickness": {
+    "value": 6.0,
+    "unit": "mm"
+   }
+  },
+  {
+   "part_no": "PL-JKT",
+   "name": "자켓 판",
+   "kind": "PART",
+   "material": "SS400",
+   "thickness": {
+    "value": 4.5,
+    "unit": "mm"
+   }
+  },
+  {
+   "part_no": "LUG",
+   "name": "러그",
+   "kind": "PART",
+   "material": "SS400",
+   "thickness": {
+    "value": 10.0,
+    "unit": "mm"
+   }
+  },
+  {
+   "part_no": "HD-BLANK",
+   "name": "경판 블랭크",
+   "kind": "PART",
+   "material": "SUS304",
+   "thickness": {
+    "value": 8.0,
+    "unit": "mm"
+   }
+  },
+  {
+   "part_no": "BRK-01",
+   "name": "브래킷",
+   "kind": "PART",
+   "material": "SUS316L"
+  },
+  {
+   "part_no": "PL-SHELL2",
+   "name": null,
+   "kind": "PART",
+   "material": "SUS316L",
+   "thickness": {
+    "value": 8.0,
+    "unit": "mm"
+   }
+  },
+  {
+   "part_no": "FL-PLATE",
+   "name": "플랜지 판",
+   "kind": "PART",
+   "material": "SUS304",
+   "thickness": {
+    "value": 12.0,
+    "unit": "mm"
+   }
+  },
+  {
+   "part_no": "BASE-01",
+   "name": null,
+   "kind": "PART",
+   "material": "SS400",
+   "thickness": {
+    "value": 16.0,
+    "unit": "mm"
+   }
+  },
+  {
+   "part_no": "COVER-O1",
+   "name": "커버 판",
+   "kind": "PART",
+   "material": "SUS304",
+   "thickness": {
+    "value": 3.0,
+    "unit": "mm"
+   }
+  },
+  {
+   "part_no": "GUSSET",
+   "name": "거셋",
+   "kind": "PART",
+   "material": "SS400",
+   "thickness": {
+    "value": 9.0,
+    "unit": "mm"
+   }
+  }
+ ]
+}

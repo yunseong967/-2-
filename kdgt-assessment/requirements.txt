@@ -4,3 +4,9 @@ numpy>=2.0           # 과제 05
 pandas>=2.2          # 과제 05
 scikit-learn==1.9.1  # 과제 05 (재학습 재현성을 위해 버전 고정)
 anthropic>=2.4       # 과제 07 (Claude API)
+pdfplumber>=0.11     # 과제 02 (벡터 PDF)
+opencv-python-headless>=4.9   # 과제 02 (스캔 도형)
+pytesseract>=0.3     # 과제 02 (OCR, 시스템에 tesseract-ocr + kor 필요)
+ezdxf>=1.3           # 과제 02 (DXF)
+reportlab>=4.0       # 과제 02 (합성 도면 생성)
+pypdf>=4.0           # 과제 02

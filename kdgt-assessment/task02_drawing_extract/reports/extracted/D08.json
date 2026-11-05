@@ -1,0 +1,62 @@
+{
+ "drawing": "D08",
+ "file": "D08_scan.pdf",
+ "source": "scan",
+ "processing_ms": 3147.4,
+ "notes": [
+  "기울기 보정 -0.79°",
+  "OCR 영역 17개"
+ ],
+ "fields": {
+  "part_no": {
+   "value": "BASE-01",
+   "status": "OK",
+   "evidence": "라벨 '품번' 오른쪽",
+   "reason": null
+  },
+  "name": {
+   "value": null,
+   "status": "REVIEW",
+   "evidence": "표제란에서 '품명' 라벨을 찾지 못함",
+   "reason": "품명 판독 불가: None"
+  },
+  "material": {
+   "value": "SS400",
+   "status": "OK",
+   "evidence": "라벨 '재질' 오른쪽",
+   "reason": null
+  },
+  "thickness_mm": {
+   "value": 16.0,
+   "status": "OK",
+   "evidence": "라벨 '두께' 오른쪽: 16 → 16.0 mm",
+   "reason": null
+  },
+  "length_mm": {
+   "value": 1200.0,
+   "status": "OK",
+   "evidence": "가로(외형 아래): 1.2m → 1.2 m",
+   "reason": null
+  },
+  "width_mm": {
+   "value": 800.0,
+   "status": "OK",
+   "evidence": "세로(외형 왼쪽): 80cm → 80.0 cm",
+   "reason": null
+  },
+  "hole_count": {
+   "value": 4,
+   "status": "OK",
+   "evidence": "지시 '4-22 THRU' = 도형 원 4개",
+   "reason": null
+  },
+  "hole_dia_mm": {
+   "value": 22.0,
+   "status": "OK",
+   "evidence": "지시 '4-22 THRU'",
+   "reason": null
+  }
+ },
+ "review_fields": [],
+ "status": "OK"
+}

@@ -1,0 +1,17 @@
+{
+ "drawing": "H05",
+ "format": "vector",
+ "part_no": "SP-510",
+ "name": "보강 판",
+ "material": "SUS316L",
+ "thickness_mm": null,
+ "length_mm": 1000,
+ "width_mm": 600,
+ "hole_count": 8,
+ "hole_dia_mm": null,
+ "expect_review": [
+  "thickness_mm",
+  "hole_dia_mm"
+ ],
+ "note": "vector, 가로 '1000', 세로 '600', 두께 '', 홀 8개 grid4x2 지시 없음"
+}

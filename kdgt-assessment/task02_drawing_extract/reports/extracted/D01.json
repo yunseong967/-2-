@@ -1,0 +1,59 @@
+{
+ "drawing": "D01",
+ "file": "D01_vector.pdf",
+ "source": "vector",
+ "processing_ms": 15.0,
+ "notes": [],
+ "fields": {
+  "part_no": {
+   "value": "PL-SHELL",
+   "status": "OK",
+   "evidence": "라벨 '품번' 오른쪽",
+   "reason": null
+  },
+  "name": {
+   "value": "쉘 판",
+   "status": "OK",
+   "evidence": "라벨 '품명' 오른쪽",
+   "reason": null
+  },
+  "material": {
+   "value": "SUS304",
+   "status": "OK",
+   "evidence": "라벨 '재질' 오른쪽",
+   "reason": null
+  },
+  "thickness_mm": {
+   "value": 6.0,
+   "status": "OK",
+   "evidence": "라벨 '두께' 오른쪽: 6 → 6.0 mm",
+   "reason": null
+  },
+  "length_mm": {
+   "value": 1260.0,
+   "status": "OK",
+   "evidence": "가로(외형 아래): 1260 → 1260.0 mm",
+   "reason": null
+  },
+  "width_mm": {
+   "value": 1000.0,
+   "status": "OK",
+   "evidence": "세로(외형 왼쪽): 1000 → 1000.0 mm",
+   "reason": null
+  },
+  "hole_count": {
+   "value": 4,
+   "status": "OK",
+   "evidence": "지시 '4-Ø12 THRU' = 도형 원 4개",
+   "reason": null
+  },
+  "hole_dia_mm": {
+   "value": 12.0,
+   "status": "OK",
+   "evidence": "지시 '4-Ø12 THRU'",
+   "reason": null
+  }
+ },
+ "review_fields": [],
+ "status": "OK"
+}

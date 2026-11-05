@@ -1,0 +1,16 @@
+{
+ "drawing": "H09",
+ "format": "scan",
+ "part_no": "RB-650",
+ "name": "칸막이 판",
+ "material": "SUS316L",
+ "thickness_mm": null,
+ "length_mm": 200,
+ "width_mm": 150,
+ "hole_count": 1,
+ "hole_dia_mm": 22,
+ "expect_review": [
+  "thickness_mm"
+ ],
+ "note": "scan, 가로 '20 cm', 세로 '15 cm', 두께 '', 홀 1개 center, 기울기 -1.94° 잡음 12"
+}

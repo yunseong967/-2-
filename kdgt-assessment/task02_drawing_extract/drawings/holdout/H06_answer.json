@@ -1,0 +1,17 @@
+{
+ "drawing": "H06",
+ "format": "scan",
+ "part_no": "SP-147",
+ "name": "덮개 판",
+ "material": "SUS304",
+ "thickness_mm": null,
+ "length_mm": 800,
+ "width_mm": 400,
+ "hole_count": 4,
+ "hole_dia_mm": null,
+ "expect_review": [
+  "thickness_mm",
+  "hole_dia_mm"
+ ],
+ "note": "scan, 가로 '0.8 m', 세로 '400', 두께 '', 홀 4개 corners 지시 없음, 기울기 -0.52° 잡음 20"
+}

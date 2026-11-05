@@ -1,0 +1,61 @@
+{
+ "drawing": "D02",
+ "file": "D02_vector.pdf",
+ "source": "vector",
+ "processing_ms": 13.4,
+ "notes": [],
+ "fields": {
+  "part_no": {
+   "value": "PL-JKT",
+   "status": "OK",
+   "evidence": "라벨 '품번' 오른쪽",
+   "reason": null
+  },
+  "name": {
+   "value": "자켓 판",
+   "status": "OK",
+   "evidence": "라벨 '품명' 오른쪽",
+   "reason": null
+  },
+  "material": {
+   "value": "SS400",
+   "status": "OK",
+   "evidence": "라벨 '재질' 오른쪽",
+   "reason": null
+  },
+  "thickness_mm": {
+   "value": 4.5,
+   "status": "OK",
+   "evidence": "라벨 '두께' 오른쪽: 4.5 → 4.5 mm",
+   "reason": null
+  },
+  "length_mm": {
+   "value": 1300.0,
+   "status": "OK",
+   "evidence": "가로(외형 아래): 1300 → 1300.0 mm",
+   "reason": null
+  },
+  "width_mm": {
+   "value": 800.0,
+   "status": "OK",
+   "evidence": "세로(외형 왼쪽): 800 → 800.0 mm",
+   "reason": null
+  },
+  "hole_count": {
+   "value": 6,
+   "status": "OK",
+   "evidence": "지시 없음, 도형 원 6개",
+   "reason": null
+  },
+  "hole_dia_mm": {
+   "value": null,
+   "status": "REVIEW",
+   "evidence": "도형 원 6개",
+   "reason": "홀 지름 지시가 없음 — 도형 크기로 추측하지 않음(실척 아님)"
+  }
+ },
+ "review_fields": [
+  "hole_dia_mm"
+ ],
+ "status": "NEEDS_REVIEW"
+}

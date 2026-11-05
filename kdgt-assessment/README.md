@@ -10,6 +10,7 @@ cd kdgt-assessment
 python -m pip install -r requirements.txt -r requirements-dev.txt   # openpyxl, pytest
 python -m pytest                                # 전체 테스트
 python -m task01_data_integration.cli verify    # 과제 01 완료 기준 검증
+python -m task02_drawing_extract.evaluate       # 과제 02 도면 추출 정확도 (+ holdout)
 python -m task03_bom_revision.cli verify        # 과제 03 완료 기준 검증
 python -m task04_auto_quote.cli verify          # 과제 04 완료 기준 검증 (+ 견적 Excel)
 python -m task05_quote_model.cli train          # 과제 05 학습·평가·누수 검사
@@ -23,14 +24,14 @@ python -m task09_delivery_kpi.cli serve         # 과제 09 일정 비교 화면
 python -m task10_deploy.verify --runner docker   # 과제 10 컨테이너 배포·장애 복구 검증 (Docker 필요)
 ```
 
-Python 3.11 이상. 외부 라이브러리는 `openpyxl`(과제 04), `numpy`·`pandas`·`scikit-learn`(과제 05), `anthropic`(과제 07) 이며 나머지 과제는 표준 라이브러리(SQLite 내장)만 씁니다.
+Python 3.11 이상. 외부 라이브러리는 `openpyxl`(과제 04), `numpy`·`pandas`·`scikit-learn`(과제 05), `anthropic`(과제 07), OCR·도면 처리 라이브러리(과제 02, 시스템에 tesseract 필요) 이며 나머지 과제는 표준 라이브러리(SQLite 내장)만 씁니다.
 
 ## 과제 현황
 
 | # | 과제 | 상태 | 폴더 |
 |---|---|---|---|
 | 01 | 제조 데이터 통합과 정합성 검사 | 구현·검증 완료 | [task01_data_integration](task01_data_integration/README.md) |
-| 02 | CAD 도면 객체 추출 | 예정 | |
+| 02 | CAD 도면 객체 추출 | 구현·검증 완료 | [task02_drawing_extract](task02_drawing_extract/README.md) |
 | 03 | BOM 생성과 개정 관리 | 구현·검증 완료 | [task03_bom_revision](task03_bom_revision/README.md) |
 | 04 | 근거를 보여주는 자동 견적 | 구현·검증 완료 | [task04_auto_quote](task04_auto_quote/README.md) |
 | 05 | 견적 예측 모델의 타당성 | 구현·검증 완료 | [task05_quote_model](task05_quote_model/README.md) |
@@ -54,6 +55,7 @@ kdgt-assessment/
 ├── common/            DB 연결, CSV 읽기(UTF-8/CP949), 행 해시, 엄격한 날짜 파싱, JSON HTTP 서버
 ├── docs/              AI 사용 기록 템플릿
 ├── task01_data_integration/   과제 01
+├── task02_drawing_extract/    과제 02
 ├── task03_bom_revision/       과제 03
 ├── task04_auto_quote/         과제 04
 ├── task05_quote_model/        과제 05

@@ -1,0 +1,59 @@
+{
+ "drawing": "D04",
+ "file": "D04_vector.pdf",
+ "source": "vector",
+ "processing_ms": 20.7,
+ "notes": [],
+ "fields": {
+  "part_no": {
+   "value": "HD-BLANK",
+   "status": "OK",
+   "evidence": "라벨 '품번' 오른쪽",
+   "reason": null
+  },
+  "name": {
+   "value": "경판 블랭크",
+   "status": "OK",
+   "evidence": "라벨 '품명' 오른쪽",
+   "reason": null
+  },
+  "material": {
+   "value": "SUS304",
+   "status": "OK",
+   "evidence": "라벨 '재질' 오른쪽",
+   "reason": null
+  },
+  "thickness_mm": {
+   "value": 8.0,
+   "status": "OK",
+   "evidence": "라벨 '두께' 오른쪽: 8 → 8.0 mm",
+   "reason": null
+  },
+  "length_mm": {
+   "value": 960.0,
+   "status": "OK",
+   "evidence": "가로(외형 아래): 0.96 m → 0.96 m",
+   "reason": null
+  },
+  "width_mm": {
+   "value": 960.0,
+   "status": "OK",
+   "evidence": "세로(외형 왼쪽): 960 → 960.0 mm",
+   "reason": null
+  },
+  "hole_count": {
+   "value": 1,
+   "status": "OK",
+   "evidence": "지시 '1-Ø50 THRU' = 도형 원 1개",
+   "reason": null
+  },
+  "hole_dia_mm": {
+   "value": 50.0,
+   "status": "OK",
+   "evidence": "지시 '1-Ø50 THRU'",
+   "reason": null
+  }
+ },
+ "review_fields": [],
+ "status": "OK"
+}

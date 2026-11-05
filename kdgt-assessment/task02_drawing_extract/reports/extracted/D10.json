@@ -1,0 +1,62 @@
+{
+ "drawing": "D10",
+ "file": "D10_scan.pdf",
+ "source": "scan",
+ "processing_ms": 4435.9,
+ "notes": [
+  "기울기 보정 -1.50°",
+  "OCR 영역 17개"
+ ],
+ "fields": {
+  "part_no": {
+   "value": "GUSSET",
+   "status": "OK",
+   "evidence": "라벨 '품번' 오른쪽",
+   "reason": null
+  },
+  "name": {
+   "value": "거셋",
+   "status": "OK",
+   "evidence": "라벨 '품명' 오른쪽",
+   "reason": null
+  },
+  "material": {
+   "value": "SS400",
+   "status": "OK",
+   "evidence": "라벨 '재질' 오른쪽",
+   "reason": null
+  },
+  "thickness_mm": {
+   "value": 9.0,
+   "status": "OK",
+   "evidence": "라벨 '두께' 오른쪽: 9 → 9.0 mm",
+   "reason": null
+  },
+  "length_mm": {
+   "value": 250.0,
+   "status": "OK",
+   "evidence": "가로(외형 아래): 250 → 250.0 mm",
+   "reason": null
+  },
+  "width_mm": {
+   "value": 150.0,
+   "status": "OK",
+   "evidence": "세로(외형 왼쪽): 150 → 150.0 mm",
+   "reason": null
+  },
+  "hole_count": {
+   "value": 0,
+   "status": "OK",
+   "evidence": "지시 없음, 도형 원 0개",
+   "reason": null
+  },
+  "hole_dia_mm": {
+   "value": null,
+   "status": "OK",
+   "evidence": "홀 없음 (해당 없음)",
+   "reason": null
+  }
+ },
+ "review_fields": [],
+ "status": "OK"
+}
